@@ -12,6 +12,10 @@ struct AddPracticeExamView: View {
     @State private var totalScore: String = ""
     @State private var notes = ""
 
+    // Alert states
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
+
     // Subject scores
     @State private var turkce = SubjectScores()
     @State private var matematik = SubjectScores()
@@ -27,14 +31,28 @@ struct AddPracticeExamView: View {
                     TextField("Sınav Adı", text: $name)
                     DatePicker("Tarih", selection: $date, displayedComponents: .date)
 
-                    HStack {
-                        Text("Toplam Puan")
-                        Spacer()
-                        TextField("Puan", text: $totalScore)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 80)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text("Toplam Puan")
+                            Spacer()
+                            TextField("Puan", text: $totalScore)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 80)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(
+                                            isScoreInvalid ? Color.red : Color.clear, lineWidth: 1)
+                                )
+                        }
+
+                        if isScoreInvalid {
+                            Text("LGS'de maksimum puan 500'dür")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                                .padding(.leading, 4)
+                        }
                     }
                 }
 
@@ -65,13 +83,67 @@ struct AddPracticeExamView: View {
                     Button("Kaydet") {
                         saveExam()
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(!isFormValid)
                 }
             }
         }
+        .alert("Hatalı Veri", isPresented: $showingAlert) {
+            Button("Tamam", role: .cancel) {}
+        } message: {
+            Text(alertMessage)
+        }
+    }
+
+    private var isFormValid: Bool {
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && validateAllInputs().isEmpty
+    }
+
+    private var isScoreInvalid: Bool {
+        if let score = Double(totalScore), score > 500 {
+            return true
+        }
+        return false
+    }
+
+    private func validateAllInputs() -> String {
+        // Validate subject question counts
+        let subjects = [
+            ("Türkçe", turkce, 20),
+            ("Matematik", matematik, 20),
+            ("Fen Bilimleri", fen, 20),
+            ("Sosyal Bilgiler", sosyal, 10),
+            ("Din Kültürü", din, 10),
+            ("İngilizce", ingilizce, 10),
+        ]
+
+        for (subjectName, scores, maxQuestions) in subjects {
+            let correct = Int(scores.correct) ?? 0
+            let wrong = Int(scores.wrong) ?? 0
+            let empty = Int(scores.empty) ?? 0
+            let total = correct + wrong + empty
+
+            if total > maxQuestions {
+                return
+                    "\(subjectName) dersi için toplam soru sayısı \(maxQuestions)'dan fazla olamaz. (Girilen: \(total))"
+            }
+        }
+
+        // Validate total score
+        if let score = Double(totalScore), score > 500 {
+            return "LGS'de maksimum puan 500'dür. Lütfen geçerli bir puan giriniz."
+        }
+
+        return ""
     }
 
     private func saveExam() {
+        let validationError = validateAllInputs()
+        if !validationError.isEmpty {
+            alertMessage = validationError
+            showingAlert = true
+            return
+        }
+
         withAnimation {
             let exam = PracticeExam(
                 name: name.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -83,6 +155,10 @@ struct AddPracticeExamView: View {
             // Set subject net scores
             exam.turkceNet = turkce.net
             exam.matematikNet = matematik.net
+            exam.fenNet = fen.net
+            exam.sosyalNet = sosyal.net
+            exam.dinNet = din.net
+            exam.ingilizceNet = ingilizce.net
 
             // Set up the relationship
             exam.student = student
@@ -129,11 +205,44 @@ struct SubjectScoreRow: View {
         String(format: "%.2f", scores.net)
     }
 
+    private var maxQuestions: Int {
+        switch subject {
+        case "Türkçe", "Matematik", "Fen Bilimleri":
+            return 20
+        default:
+            return 10
+        }
+    }
+
+    private var totalQuestions: Int {
+        let correct = Int(scores.correct) ?? 0
+        let wrong = Int(scores.wrong) ?? 0
+        let empty = Int(scores.empty) ?? 0
+        return correct + wrong + empty
+    }
+
+    private var isOverLimit: Bool {
+        totalQuestions > maxQuestions
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(subject)
-                .font(.headline)
-                .padding(.bottom, 4)
+            HStack {
+                Text(subject)
+                    .font(.headline)
+                    .foregroundColor(isOverLimit ? .red : .primary)
+
+                Spacer()
+
+                Text("\(totalQuestions)/\(maxQuestions)")
+                    .font(.caption)
+                    .foregroundColor(isOverLimit ? .red : .secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(isOverLimit ? Color.red.opacity(0.1) : Color.gray.opacity(0.1))
+                    .cornerRadius(4)
+            }
+            .padding(.bottom, 4)
 
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -170,12 +279,17 @@ struct SubjectScoreRow: View {
                     Text(netScore)
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(8)
-                        .background(Color(.systemGray6))
+                        .background(isOverLimit ? Color.red.opacity(0.1) : Color(.systemGray6))
                         .cornerRadius(6)
+                        .foregroundColor(isOverLimit ? .red : .primary)
                 }
             }
         }
         .padding(.vertical, 8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(isOverLimit ? Color.red : Color.clear, lineWidth: 1)
+        )
     }
 }
 
@@ -190,6 +304,10 @@ struct EditPracticeExamView: View {
     @State private var date = Date()
     @State private var totalScore: String = ""
     @State private var notes = ""
+
+    // Alert states
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
 
     // Subject scores
     @State private var turkce = SubjectScores()
@@ -206,14 +324,29 @@ struct EditPracticeExamView: View {
                     TextField("Sınav Adı", text: $name)
                     DatePicker("Tarih", selection: $date, displayedComponents: .date)
 
-                    HStack {
-                        Text("Toplam Puan")
-                        Spacer()
-                        TextField("Puan", text: $totalScore)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 80)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text("Toplam Puan")
+                            Spacer()
+                            TextField("Puan", text: $totalScore)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 80)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(
+                                            isEditScoreInvalid ? Color.red : Color.clear,
+                                            lineWidth: 1)
+                                )
+                        }
+
+                        if isEditScoreInvalid {
+                            Text("LGS'de maksimum puan 500'dür")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                                .padding(.leading, 4)
+                        }
                     }
                 }
 
@@ -244,9 +377,14 @@ struct EditPracticeExamView: View {
                     Button("Kaydet") {
                         updateExam()
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(!isEditFormValid)
                 }
             }
+        }
+        .alert("Hatalı Veri", isPresented: $showingAlert) {
+            Button("Tamam", role: .cancel) {}
+        } message: {
+            Text(alertMessage)
         }
         .onAppear {
             loadExamData()
@@ -262,9 +400,63 @@ struct EditPracticeExamView: View {
         // Load subject scores (converting from net back to approximate correct/wrong)
         turkce.correct = String(format: "%.0f", exam.turkceNet)
         matematik.correct = String(format: "%.0f", exam.matematikNet)
+        fen.correct = String(format: "%.0f", exam.fenNet)
+        sosyal.correct = String(format: "%.0f", exam.sosyalNet)
+        din.correct = String(format: "%.0f", exam.dinNet)
+        ingilizce.correct = String(format: "%.0f", exam.ingilizceNet)
+    }
+
+    private var isEditFormValid: Bool {
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && validateEditInputs().isEmpty
+    }
+
+    private var isEditScoreInvalid: Bool {
+        if let score = Double(totalScore), score > 500 {
+            return true
+        }
+        return false
+    }
+
+    private func validateEditInputs() -> String {
+        // Validate subject question counts
+        let subjects = [
+            ("Türkçe", turkce, 20),
+            ("Matematik", matematik, 20),
+            ("Fen Bilimleri", fen, 20),
+            ("Sosyal Bilgiler", sosyal, 10),
+            ("Din Kültürü", din, 10),
+            ("İngilizce", ingilizce, 10),
+        ]
+
+        for (subjectName, scores, maxQuestions) in subjects {
+            let correct = Int(scores.correct) ?? 0
+            let wrong = Int(scores.wrong) ?? 0
+            let empty = Int(scores.empty) ?? 0
+            let total = correct + wrong + empty
+
+            if total > maxQuestions {
+                return
+                    "\(subjectName) dersi için toplam soru sayısı \(maxQuestions)'dan fazla olamaz. (Girilen: \(total))"
+            }
+        }
+
+        // Validate total score
+        if let score = Double(totalScore), score > 500 {
+            return "LGS'de maksimum puan 500'dür. Lütfen geçerli bir puan giriniz."
+        }
+
+        return ""
     }
 
     private func updateExam() {
+        let validationError = validateEditInputs()
+        if !validationError.isEmpty {
+            alertMessage = validationError
+            showingAlert = true
+            return
+        }
+
         withAnimation {
             // Update exam properties
             exam.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -275,6 +467,10 @@ struct EditPracticeExamView: View {
             // Update subject net scores
             exam.turkceNet = turkce.net
             exam.matematikNet = matematik.net
+            exam.fenNet = fen.net
+            exam.sosyalNet = sosyal.net
+            exam.dinNet = din.net
+            exam.ingilizceNet = ingilizce.net
 
             do {
                 try modelContext.save()
