@@ -12,10 +12,13 @@ import SwiftData
 struct LGS_Kocum_PROApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Student.self,
+            PracticeExam.self,
+            QuestionPerformance.self,
         ])
+        
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
+        
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {

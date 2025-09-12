@@ -1,0 +1,502 @@
+Durum Analizi
+PracticeExamsViewModel.sortedExams → student.practiceExams dizisini kullanıyor
+StudentDetailView
+.
+Sen AddPracticeExamView.saveExam() içinde sınav eklerken iki şey yapıyorsun:
+modelContext.insert(exam)
+student.practiceExams.append(exam)
+try modelContext.save()
+Yani hem modelContext.insert(exam) ile ekliyorsun hem de student.practiceExams.append(exam) diyorsun
+AddPracticeExamView
+.
+Ancak SwiftData’da ilişkiyi (@Relationship) zaten PracticeExam.student = student olarak ayarladığında, student.practiceExams otomatik güncellenmeli. Manuel append bazen bellek ile kalıcı context arasında uyumsuzluk yaratıyor.
+Neden listede görünmüyor?
+PracticeExamsTab içinde @StateObject olan PracticeExamsViewModel var ve bu sadece student.practiceExams dizisini okuyor
+StudentDetailView
+.
+Ama student parametre ile geliyor, yani @Query değil. Bu yüzden SwiftData otomatik refresh etmiyor. Sen yeni sınav eklesen bile StudentDetailView’e geçirilen student objesi güncellenmeyebilir.
+Logda “4 exams” yazması aslında ViewModel’in array’i saydığını gösteriyor ama List boş çıkıyorsa, büyük ihtimalle List ile @Published arasında refresh tetiklenmiyor.
+Çözüm Önerileri
+İlişkiyi tek taraftan yönet
+AddPracticeExamView.saveExam() içinde student.practiceExams.append(exam) satırını kaldır. Sadece:
+exam.student = student
+modelContext.insert(exam)
+try modelContext.save()
+bırak. SwiftData ilişkiyi kendisi günceller.
+ViewModel’i güncelle
+PracticeExamsViewModel içinde @Published var exams: [PracticeExam] tutup onAppear veya modelContext değiştiğinde fetch edebilirsin. Şu an sadece student.practiceExams’e bakıyor.
+@Query kullanmayı düşün
+PracticeExamsTab içinde doğrudan:
+@Query(filter: #Predicate { $0.student == student },
+       sort: \PracticeExam.date, order: .reverse)
+var exams: [PracticeExam]
+şeklinde yaparsan otomatik refresh alırsın.
+👉 İstersen ben sana PracticeExamsTab’i @Query ile yeniden yazayım, böylece eklediğin sınavlar anında listede görünsün. İster misin?
+
+Kaynaklar
+Şunu dedin:
+hadi yaz
+ChatGPT:
+Tamam 👍 PracticeExamsTab’i @Query ile yeniden yazarsak, SwiftData otomatik olarak öğrencinin sınavlarını getirir ve eklediğinde/ sildiğinde anında güncellenir.
+Aşağıda güncellenmiş versiyonu bırakıyorum:
+
+struct PracticeExamsTab: View {
+    let student: Student
+    @Environment(\.modelContext) private var modelContext
+    @State private var showingAddExam = false
+    
+    // SwiftData query: sadece bu öğrenciye ait sınavlar
+    @Query(
+        filter: #Predicate<PracticeExam> { exam in
+            exam.student == student
+        },
+        sort: \PracticeExam.date,
+        order: .reverse
+    ) private var exams: [PracticeExam]
+    
+    var body: some View {
+        VStack {
+            if exams.isEmpty {
+                ContentUnavailableView(
+                    "Henüz Deneme Sınavı Yok",
+                    systemImage: "doc.text.magnifyingglass",
+                    description: Text("Öğrenci için yeni bir deneme sınavı ekleyin")
+                )
+            } else {
+                List {
+                    ForEach(exams) { exam in
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(exam.name)
+                                    .font(.headline)
+                                Spacer()
+                                Text(exam.date.formatted(date: .abbreviated, time: .omitted))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            
+                            HStack {
+                                Text("\(Int(exam.totalScore)) puan")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.blue)
+                                
+                                Spacer()
+                                
+                                if !exam.notes.isEmpty {
+                                    Text(exam.notes)
+                                        .font(.caption)
+                                        .lineLimit(1)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .onDelete(perform: deleteExams)
+                }
+                .listStyle(.plain)
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: { showingAddExam = true }) {
+                    Label("Ekle", systemImage: "plus")
+                }
+            }
+        }
+        .sheet(isPresented: $showingAddExam) {
+            AddPracticeExamView(student: student)
+                .environment(\.modelContext, modelContext)
+        }
+        .onAppear {
+            print("🔄 PracticeExamsTab appeared with \(exams.count) exams")
+        }
+    }
+    
+    private func deleteExams(at offsets: IndexSet) {
+        for index in offsets {
+            let exam = exams[index]
+            modelContext.delete(exam)
+        }
+        try? modelContext.save()
+    }
+}
+Ne değişti?
+PracticeExamsViewModel kalktı, artık gerek yok.
+@Query ile sınavlar otomatik olarak çekiliyor → yeni sınav eklediğinde ya da sildiğinde liste otomatik güncellenir.
+deleteExams doğrudan modelContext.delete ile çalışıyor.
+👉 İstersen ben sana StudentDetailView’de de buna uygun küçük düzenlemeyi gösterebilirim. İster misin?
+Şunu dedin:
+bu yeni bir dosya mı? hangi dosyanın içeriği olacak bu kod?
+ChatGPT:
+Güzel soru 👍
+Bu kod yeni bir dosya değil. Senin bana gönderdiğin StudentDetailView.swift dosyası içinde zaten PracticeExamsTab vardı
+StudentDetailView
+.
+
+Benim verdiğim kod, o dosyadaki mevcut PracticeExamsTab tanımını birebir değiştirecek yeni sürüm.
+
+Yani yapman gereken:
+StudentDetailView.swift dosyasını aç.
+İçindeki şu kısmı bul:
+struct PracticeExamsTab: View {
+    @StateObject private var viewModel: PracticeExamsViewModel
+    ...
+}
+Tamamını sil → benim verdiğim PracticeExamsTab kodunu oraya yapıştır.
+PracticeExamsViewModel artık kullanılmayacağı için o sınıfı da silebilirsin.
+👉 İstersen ben sana temizlenmiş tam StudentDetailView.swift dosyasını da baştan sona uyarlanmış şekilde verebilirim. İstiyor musun?
+
+Kaynaklar
+Şunu dedin:
+ver
+ChatGPT:
+Süper 👍 O zaman sana PracticeExamsViewModel kaldırılmış, PracticeExamsTab kısmı @Query ile güncellenmiş tam StudentDetailView.swift dosyasını veriyorum:
+import SwiftUI
+import SwiftData
+import Charts
+
+struct StudentDetailView: View {
+    let student: Student
+    @State private var selectedTab: Tab = .overview
+    
+    enum Tab {
+        case overview, practiceExams, questions, notes
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            // Student Info Header
+            VStack(spacing: 8) {
+                Image(systemName: "person.circle.fill")
+                    .resizable()
+                    .frame(width: 80, height: 80)
+                    .foregroundStyle(.blue)
+                
+                Text(student.fullName)
+                    .font(.title2.bold())
+                
+                Text(student.school)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                
+                Text("\(student.grade). Sınıf")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(Color(.systemGroupedBackground))
+            
+            // Tab Picker
+            Picker("View", selection: $selectedTab) {
+                Label("Genel Bakış", systemImage: "chart.bar").tag(Tab.overview)
+                Label("Denemeler", systemImage: "doc.text").tag(Tab.practiceExams)
+                Label("Sorular", systemImage: "questionmark.square").tag(Tab.questions)
+                Label("Notlar", systemImage: "note.text").tag(Tab.notes)
+            }
+            .pickerStyle(.segmented)
+            .padding()
+            
+            // Tab Content
+            ScrollView {
+                switch selectedTab {
+                case .overview:
+                    OverviewTab(student: student)
+                case .practiceExams:
+                    PracticeExamsTab(student: student)
+                case .questions:
+                    QuestionsTab(student: student)
+                case .notes:
+                    NotesTab(student: student)
+                }
+            }
+        }
+        .navigationTitle(student.fullName)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+// MARK: - Tab Views
+
+struct OverviewTab: View {
+    let student: Student
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            // Stats Overview
+            VStack(spacing: 16) {
+                HStack(spacing: 16) {
+                    StatCard(value: "12", label: "Deneme Sınavı", icon: "doc.text", color: .blue)
+                    StatCard(value: "1,245", label: "Çözülen Soru", icon: "checkmark.circle", color: .green)
+                }
+                
+                HStack(spacing: 16) {
+                    StatCard(value: "%78", label: "Başarı Oranı", icon: "chart.line.uptrend.xyaxis", color: .purple)
+                    StatCard(value: "24", label: "Günlük Ortalama", icon: "flame", color: .orange)
+                }
+            }
+            .padding(.horizontal)
+            
+            // Performance Chart
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Başarı Grafiği")
+                    .font(.headline)
+                    .padding(.horizontal)
+                
+                Chart {
+                    // Bu kısım gerçek öğrenci verisiyle değiştirilecek
+                    ForEach(Array(0..<8), id: \.self) { week in
+                        LineMark(
+                            x: .value("Hafta", week + 1),
+                            y: .value("Puan", Double.random(in: 60...100))
+                        )
+                        .foregroundStyle(by: .value("Tür", "Deneme"))
+                        .symbol(Circle().strokeBorder(lineWidth: 2))
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(values: .automatic) { _ in
+                        AxisGridLine()
+                        AxisTick()
+                        AxisValueLabel()
+                    }
+                }
+                .frame(height: 200)
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+                .padding(.horizontal)
+            }
+            
+            // Recent Activity
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Son Etkinlikler")
+                    .font(.headline)
+                    .padding(.horizontal)
+                
+                VStack(spacing: 0) {
+                    // Bu kısım da gerçek verilerle değiştirilecek
+                    ForEach(0..<3) { i in
+                        HStack {
+                            Image(systemName: i == 0 ? "doc.text.fill" : "questionmark.square.fill")
+                                .foregroundStyle(i == 0 ? .blue : .green)
+                                .frame(width: 30)
+                            
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(i == 0 ? "Deneme Sınavı #\(8 - i)" : "Soru Çözümü - Matematik")
+                                    .font(.subheadline)
+                                
+                                Text("\(8 - i) gün önce • \(i == 0 ? "450" : "35") puan")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding()
+                        .background(Color(.systemBackground))
+                        
+                        if i < 2 {
+                            Divider()
+                                .padding(.leading, 40)
+                        }
+                    }
+                }
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+                .padding(.horizontal)
+            }
+            
+            Spacer()
+        }
+        .padding(.vertical)
+    }
+}
+
+struct PracticeExamsTab: View {
+    let student: Student
+    @Environment(\.modelContext) private var modelContext
+    @State private var showingAddExam = false
+    
+    @Query(
+        filter: #Predicate<PracticeExam> { exam in
+            exam.student == student
+        },
+        sort: \PracticeExam.date,
+        order: .reverse
+    ) private var exams: [PracticeExam]
+    
+    var body: some View {
+        VStack {
+            if exams.isEmpty {
+                ContentUnavailableView(
+                    "Henüz Deneme Sınavı Yok",
+                    systemImage: "doc.text.magnifyingglass",
+                    description: Text("Öğrenci için yeni bir deneme sınavı ekleyin")
+                )
+            } else {
+                List {
+                    ForEach(exams) { exam in
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(exam.name)
+                                    .font(.headline)
+                                Spacer()
+                                Text(exam.date.formatted(date: .abbreviated, time: .omitted))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            
+                            HStack {
+                                Text("\(Int(exam.totalScore)) puan")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.blue)
+                                
+                                Spacer()
+                                
+                                if !exam.notes.isEmpty {
+                                    Text(exam.notes)
+                                        .font(.caption)
+                                        .lineLimit(1)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .onDelete(perform: deleteExams)
+                }
+                .listStyle(.plain)
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: { showingAddExam = true }) {
+                    Label("Ekle", systemImage: "plus")
+                }
+            }
+        }
+        .sheet(isPresented: $showingAddExam) {
+            AddPracticeExamView(student: student)
+                .environment(\.modelContext, modelContext)
+        }
+        .onAppear {
+            print("🔄 PracticeExamsTab appeared with \(exams.count) exams")
+        }
+    }
+    
+    private func deleteExams(at offsets: IndexSet) {
+        for index in offsets {
+            let exam = exams[index]
+            modelContext.delete(exam)
+        }
+        try? modelContext.save()
+    }
+}
+
+struct QuestionsTab: View {
+    let student: Student
+    
+    var body: some View {
+        Text("Soru Çözümleri")
+    }
+}
+
+struct NotesTab: View {
+    let student: Student
+    @State private var notes: String = ""
+    
+    var body: some View {
+        VStack {
+            TextEditor(text: $notes)
+                .frame(minHeight: 200)
+                .padding()
+                .background(Color(.systemBackground))
+                .cornerRadius(12)
+                .padding()
+                .onAppear {
+                    notes = student.notes
+                }
+                .onChange(of: notes) {
+                    student.notes = notes
+                }
+            
+            Spacer()
+        }
+    }
+}
+
+// MARK: - Helper Views
+
+struct StatCard: View {
+    let value: String
+    let label: String
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: icon)
+                    .foregroundStyle(color)
+                
+                Spacer()
+            }
+            
+            Text(value)
+                .font(.title2.bold())
+            
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+    }
+}
+
+#Preview {
+    struct StudentDetailViewPreview: View {
+        @State private var student: Student = {
+            let student = Student(
+                firstName: "Ahmet",
+                lastName: "Yılmaz",
+                school: "Örnek Ortaokulu",
+                grade: 8,
+                notes: "Matematikte iyi, fen derslerine ağırlık verilmeli."
+            )
+            
+            // Örnek deneme sınavları
+            let subjects = ["Matematik", "Fen Bilimleri", "Türkçe", "Sosyal Bilgiler"]
+            for i in 1...5 {
+                let exam = PracticeExam(
+                    name: "LGS Deneme \(i)",
+                    date: Calendar.current.date(byAdding: .day, value: -i * 7, to: Date())!,
+                    totalScore: Double.random(in: 400...500),
+                    notes: subjects.randomElement()! + " ağırlıklı"
+                )
+                student.practiceExams.append(exam)
+            }
+            
+            return student
+        }()
+        
+        var body: some View {
+            NavigationStack {
+                StudentDetailView(student: student)
+            }
+        }
+    }
+    
+    return StudentDetailViewPreview()
+        .modelContainer(for: [Student.self, PracticeExam.self, QuestionPerformance.self], inMemory: true)
+}
+✅ Bu haliyle:
+PracticeExamsViewModel kaldırıldı.
+PracticeExamsTab artık @Query kullanıyor → yeni eklenen sınavlar anında listede gözükecek.
