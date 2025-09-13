@@ -11,6 +11,15 @@ final class Student: Identifiable, ObservableObject {
     var notes: String
     var createdAt: Date
 
+    // Goal tracking fields
+    var targetTotalScore: Double = 400  // Default LGS target
+    var targetTurkceNet: Double = 15
+    var targetMatematikNet: Double = 15
+    var targetFenNet: Double = 15
+    var targetSosyalNet: Double = 8
+    var targetDinNet: Double = 8
+    var targetIngilizceNet: Double = 8
+
     @Relationship(deleteRule: .cascade) var practiceExams = [PracticeExam]() {
         didSet {
             objectWillChange.send()
@@ -31,7 +40,79 @@ final class Student: Identifiable, ObservableObject {
     }
 
     var fullName: String {
-        return "\(firstName) \(lastName)"
+        let first = firstName.isEmpty ? "Ad" : firstName
+        let last = lastName.isEmpty ? "Soyad" : lastName
+        return "\(first) \(last)"
+    }
+
+    // Goal tracking computed properties
+    var currentAverageScore: Double {
+        guard !practiceExams.isEmpty else { return 0 }
+        let total = practiceExams.map { $0.totalScore }.reduce(0, +)
+        let count = Double(practiceExams.count)
+        guard count > 0 else { return 0 }
+        return total / count
+    }
+
+    var scoreProgress: Double {
+        guard targetTotalScore > 0, currentAverageScore > 0 else { return 0 }
+        let progress = currentAverageScore / targetTotalScore
+        guard progress.isFinite else { return 0 }
+        return min(1.0, max(0.0, progress))
+    }
+
+    var averageTurkceNet: Double {
+        guard !practiceExams.isEmpty else { return 0 }
+        let total = practiceExams.map { $0.turkceNet }.reduce(0, +)
+        let count = Double(practiceExams.count)
+        guard count > 0 else { return 0 }
+        let average = total / count
+        return average.isFinite ? average : 0
+    }
+
+    var averageMatematikNet: Double {
+        guard !practiceExams.isEmpty else { return 0 }
+        let total = practiceExams.map { $0.matematikNet }.reduce(0, +)
+        let count = Double(practiceExams.count)
+        guard count > 0 else { return 0 }
+        let average = total / count
+        return average.isFinite ? average : 0
+    }
+
+    var averageFenNet: Double {
+        guard !practiceExams.isEmpty else { return 0 }
+        let total = practiceExams.map { $0.fenNet }.reduce(0, +)
+        let count = Double(practiceExams.count)
+        guard count > 0 else { return 0 }
+        let average = total / count
+        return average.isFinite ? average : 0
+    }
+
+    var averageSosyalNet: Double {
+        guard !practiceExams.isEmpty else { return 0 }
+        let total = practiceExams.map { $0.sosyalNet }.reduce(0, +)
+        let count = Double(practiceExams.count)
+        guard count > 0 else { return 0 }
+        let average = total / count
+        return average.isFinite ? average : 0
+    }
+
+    var averageDinNet: Double {
+        guard !practiceExams.isEmpty else { return 0 }
+        let total = practiceExams.map { $0.dinNet }.reduce(0, +)
+        let count = Double(practiceExams.count)
+        guard count > 0 else { return 0 }
+        let average = total / count
+        return average.isFinite ? average : 0
+    }
+
+    var averageIngilizceNet: Double {
+        guard !practiceExams.isEmpty else { return 0 }
+        let total = practiceExams.map { $0.ingilizceNet }.reduce(0, +)
+        let count = Double(practiceExams.count)
+        guard count > 0 else { return 0 }
+        let average = total / count
+        return average.isFinite ? average : 0
     }
 }
 

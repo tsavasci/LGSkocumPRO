@@ -1,5 +1,6 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
@@ -7,14 +8,14 @@ struct SettingsView: View {
     @State private var showingExportOptions = false
     @State private var showingImportOptions = false
     @State private var showingResetConfirmation = false
-    
+
     enum Appearance: String, CaseIterable, Identifiable {
         case light = "Açık"
         case dark = "Koyu"
         case system = "Sisteme Uygun"
-        
+
         var id: String { self.rawValue }
-        
+
         var colorScheme: ColorScheme? {
             switch self {
             case .light: return .light
@@ -23,7 +24,7 @@ struct SettingsView: View {
             }
         }
     }
-    
+
     var body: some View {
         NavigationStack {
             Form {
@@ -39,48 +40,57 @@ struct SettingsView: View {
                     .listRowInsets(EdgeInsets())
                     .padding(.vertical, 8)
                 }
-                
+
                 // Data Management Section
                 Section(header: Text("Veri Yönetimi")) {
                     Button("Verileri Dışa Aktar") {
                         showingExportOptions = true
                     }
-                    
+
                     Button("Verileri İçe Aktar") {
                         showingImportOptions = true
                     }
-                    
+
                     Button("Verileri Sıfırla", role: .destructive) {
                         showingResetConfirmation = true
                     }
                 }
-                
+
                 // App Info Section
                 Section(header: Text("Uygulama Hakkında")) {
                     HStack {
                         Text("Versiyon")
                         Spacer()
-                        Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")
-                            .foregroundStyle(.secondary)
+                        Text(
+                            Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+                                ?? "1.0.0"
+                        )
+                        .foregroundStyle(.secondary)
                     }
-                    
-                    Link("Gizlilik Politikası", destination: URL(string: "https://example.com/privacy")!)
-                    Link("Kullanım Koşulları", destination: URL(string: "https://example.com/terms")!)
-                    
+
+                    Link(
+                        "Gizlilik Politikası",
+                        destination: URL(string: "https://example.com/privacy")!)
+                    Link(
+                        "Kullanım Koşulları", destination: URL(string: "https://example.com/terms")!
+                    )
+
                     HStack {
                         Spacer()
                         VStack(spacing: 8) {
                             Image(systemName: "graduationcap.fill")
                                 .font(.system(size: 40))
                                 .foregroundStyle(.blue)
-                            
+
                             Text("LGS Koçum PRO")
                                 .font(.title2.bold())
-                            
-                            Text("v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            
+
+                            Text(
+                                "v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")"
+                            )
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
                             Text("© 2025 Tüm Hakları Saklıdır")
                                 .font(.caption2)
                                 .foregroundStyle(.tertiary)
@@ -93,13 +103,18 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Ayarlar")
-            .confirmationDialog("Verileri Sıfırla", isPresented: $showingResetConfirmation, titleVisibility: .visible) {
+            .confirmationDialog(
+                "Verileri Sıfırla", isPresented: $showingResetConfirmation,
+                titleVisibility: .visible
+            ) {
                 Button("Sıfırla", role: .destructive) {
                     resetData()
                 }
                 Button("İptal", role: .cancel) {}
             } message: {
-                Text("Tüm öğrenci verileri ve ayarlar silinecek. Bu işlem geri alınamaz.\n\nDevam etmek istiyor musunuz?")
+                Text(
+                    "Tüm öğrenci verileri ve ayarlar silinecek. Bu işlem geri alınamaz.\n\nDevam etmek istiyor musunuz?"
+                )
             }
             .sheet(isPresented: $showingExportOptions) {
                 ExportDataView()
@@ -110,7 +125,7 @@ struct SettingsView: View {
         }
         .preferredColorScheme(appearance.colorScheme)
     }
-    
+
     private func resetData() {
         // Delete all students (this will cascade to delete related practice exams and question performances)
         do {
@@ -125,18 +140,22 @@ struct SettingsView: View {
 
 struct ExportDataView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \Student.lastName) private var allStudents: [Student]
     @State private var exportFormat: ExportFormat = .csv
     @State private var includeAllData: Bool = true
     @State private var selectedStudents: Set<Student> = []
-    
+    @State private var isExporting = false
+    @State private var exportedFileURL: URL?
+
     enum ExportFormat: String, CaseIterable, Identifiable {
         case csv = "CSV"
         case json = "JSON"
         case pdf = "PDF"
-        
+
         var id: String { self.rawValue }
     }
-    
+
     var body: some View {
         NavigationStack {
             Form {
@@ -146,22 +165,33 @@ struct ExportDataView: View {
                             Text(format.rawValue).tag(format)
                         }
                     }
-                    
+
                     Toggle("Tüm Verileri Dışa Aktar", isOn: $includeAllData)
-                    
+
                     if !includeAllData {
                         NavigationLink("Öğrencileri Seç") {
                             StudentSelectionView(selectedStudents: $selectedStudents)
                         }
                     }
                 }
-                
+
                 Section {
                     Button("Dışa Aktar") {
                         exportData()
                     }
-                    .disabled(!includeAllData && selectedStudents.isEmpty)
+                    .disabled(!includeAllData && selectedStudents.isEmpty || isExporting)
                     .frame(maxWidth: .infinity)
+
+                    if isExporting {
+                        HStack {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                            Text("Dışa aktarılıyor...")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
                 }
             }
             .navigationTitle("Veri Dışa Aktar")
@@ -173,38 +203,179 @@ struct ExportDataView: View {
                     }
                 }
             }
+            .fileExporter(
+                isPresented: .constant(exportedFileURL != nil),
+                document: ExportDocument(url: exportedFileURL),
+                contentType: exportFormat == .csv ? .commaSeparatedText : .json,
+                defaultFilename:
+                    "LGS_Kocum_Data_\(DateFormatter.filenameDateFormatter.string(from: Date()))"
+            ) { result in
+                exportedFileURL = nil
+                isExporting = false
+                switch result {
+                case .success(let url):
+                    print("File exported successfully to: \(url)")
+                case .failure(let error):
+                    print("Export failed: \(error.localizedDescription)")
+                }
+            }
         }
     }
-    
+
     private func exportData() {
-        // Implementation for exporting data
-        // This would generate a file in the selected format and share it
-        print("Exporting data as \(exportFormat.rawValue)")
-        dismiss()
+        isExporting = true
+
+        Task {
+            do {
+                let studentsToExport = includeAllData ? allStudents : Array(selectedStudents)
+                let url = try await generateExportFile(
+                    students: studentsToExport, format: exportFormat)
+
+                await MainActor.run {
+                    exportedFileURL = url
+                }
+            } catch {
+                await MainActor.run {
+                    isExporting = false
+                    print("Export failed: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    private func generateExportFile(students: [Student], format: ExportFormat) async throws -> URL {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[
+            0]
+        let fileName = "LGS_Kocum_Data_\(DateFormatter.filenameDateFormatter.string(from: Date()))"
+
+        switch format {
+        case .csv:
+            let fileURL = documentsPath.appendingPathComponent("\(fileName).csv")
+            let csvContent = generateCSVContent(students: students)
+            try csvContent.write(to: fileURL, atomically: true, encoding: .utf8)
+            return fileURL
+
+        case .json:
+            let fileURL = documentsPath.appendingPathComponent("\(fileName).json")
+            let jsonContent = try generateJSONContent(students: students)
+            try jsonContent.write(to: fileURL)
+            return fileURL
+
+        case .pdf:
+            // For PDF, we'll create a simple text-based PDF for now
+            let fileURL = documentsPath.appendingPathComponent("\(fileName).pdf")
+            let textContent = generateTextContent(students: students)
+            try textContent.write(to: fileURL, atomically: true, encoding: .utf8)
+            return fileURL
+        }
+    }
+
+    private func generateCSVContent(students: [Student]) -> String {
+        var csv =
+            "Ad,Soyad,Okul,Sınıf,Hedef Puan,Türkçe Net,Matematik Net,Fen Net,Sosyal Net,Din Net,İngilizce Net,Sınav Sayısı,Ortalama Puan\n"
+
+        for student in students {
+            let examCount = student.practiceExams.count
+            let avgScore = student.currentAverageScore
+
+            csv +=
+                "\(student.firstName),\(student.lastName),\(student.school),\(student.grade),\(student.targetTotalScore),\(student.targetTurkceNet),\(student.targetMatematikNet),\(student.targetFenNet),\(student.targetSosyalNet),\(student.targetDinNet),\(student.targetIngilizceNet),\(examCount),\(avgScore)\n"
+        }
+
+        return csv
+    }
+
+    private func generateJSONContent(students: [Student]) throws -> Data {
+        let exportData = students.map { student in
+            return [
+                "id": student.id.uuidString,
+                "firstName": student.firstName,
+                "lastName": student.lastName,
+                "school": student.school,
+                "grade": student.grade,
+                "notes": student.notes,
+                "createdAt": ISO8601DateFormatter().string(from: student.createdAt),
+                "targets": [
+                    "totalScore": student.targetTotalScore,
+                    "turkceNet": student.targetTurkceNet,
+                    "matematikNet": student.targetMatematikNet,
+                    "fenNet": student.targetFenNet,
+                    "sosyalNet": student.targetSosyalNet,
+                    "dinNet": student.targetDinNet,
+                    "ingilizceNet": student.targetIngilizceNet,
+                ],
+                "practiceExams": student.practiceExams.map { exam in
+                    return [
+                        "id": exam.id.uuidString,
+                        "name": exam.name,
+                        "date": ISO8601DateFormatter().string(from: exam.date),
+                        "totalScore": exam.totalScore,
+                        "notes": exam.notes,
+                        "nets": [
+                            "turkce": exam.turkceNet,
+                            "matematik": exam.matematikNet,
+                            "fen": exam.fenNet,
+                            "sosyal": exam.sosyalNet,
+                            "din": exam.dinNet,
+                            "ingilizce": exam.ingilizceNet,
+                        ],
+                    ]
+                },
+            ]
+        }
+
+        return try JSONSerialization.data(withJSONObject: exportData, options: .prettyPrinted)
+    }
+
+    private func generateTextContent(students: [Student]) -> String {
+        var content = "LGS Koçum PRO - Veri Raporu\n"
+        content +=
+            "Oluşturulma Tarihi: \(DateFormatter.displayDateFormatter.string(from: Date()))\n\n"
+        content += "==============================\n\n"
+
+        for student in students {
+            content += "ÖĞRENCİ: \(student.fullName)\n"
+            content += "Okul: \(student.school)\n"
+            content += "Sınıf: \(student.grade)\n"
+            content += "Hedef Puan: \(student.targetTotalScore)\n"
+            content += "Sınav Sayısı: \(student.practiceExams.count)\n"
+            content += "Ortalama Puan: \(String(format: "%.1f", student.currentAverageScore))\n"
+            content += "\nSınav Geçmişi:\n"
+
+            for exam in student.practiceExams.sorted(by: { $0.date > $1.date }) {
+                content +=
+                    "- \(exam.name): \(exam.totalScore) puan (\(DateFormatter.shortDateFormatter.string(from: exam.date)))\n"
+            }
+
+            content += "\n==============================\n\n"
+        }
+
+        return content
     }
 }
 
 struct ImportDataView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @State private var importFormat: ImportFormat = .csv
     @State private var importSource: ImportSource = .files
     @State private var isImporting = false
-    
+
     enum ImportFormat: String, CaseIterable, Identifiable {
         case csv = "CSV"
         case json = "JSON"
-        
+
         var id: String { self.rawValue }
     }
-    
+
     enum ImportSource: String, CaseIterable, Identifiable {
         case files = "Dosyalar"
         case icloud = "iCloud"
         case other = "Diğer"
-        
+
         var id: String { self.rawValue }
     }
-    
+
     var body: some View {
         NavigationStack {
             Form {
@@ -214,14 +385,14 @@ struct ImportDataView: View {
                             Text(source.rawValue).tag(source)
                         }
                     }
-                    
+
                     Picker("Format", selection: $importFormat) {
                         ForEach(ImportFormat.allCases) { format in
                             Text(format.rawValue).tag(format)
                         }
                     }
                 }
-                
+
                 Section {
                     Button("Dosya Seç") {
                         isImporting = true
@@ -254,12 +425,137 @@ struct ImportDataView: View {
             }
         }
     }
-    
+
     private func importData(from url: URL) {
-        // Implementation for importing data
-        print("Importing data from \(url.lastPathComponent) as \(importFormat.rawValue)")
-        // Process the file and import the data
+        guard url.startAccessingSecurityScopedResource() else {
+            print("Could not access file")
+            return
+        }
+
+        defer {
+            url.stopAccessingSecurityScopedResource()
+        }
+
+        do {
+            switch importFormat {
+            case .csv:
+                try importCSVData(from: url)
+            case .json:
+                try importJSONData(from: url)
+            }
+            print("Data imported successfully from \(url.lastPathComponent)")
+        } catch {
+            print("Import failed: \(error.localizedDescription)")
+        }
+
         dismiss()
+    }
+
+    private func importCSVData(from url: URL) throws {
+        let content = try String(contentsOf: url, encoding: .utf8)
+        let lines = content.components(separatedBy: .newlines).filter { !$0.isEmpty }
+
+        guard lines.count > 1 else { return }
+
+        for line in lines.dropFirst() {
+            let components = line.components(separatedBy: ",")
+            guard components.count >= 4 else { continue }
+
+            let student = Student(
+                firstName: components[0].trimmingCharacters(in: .whitespacesAndNewlines),
+                lastName: components[1].trimmingCharacters(in: .whitespacesAndNewlines),
+                school: components[2].trimmingCharacters(in: .whitespacesAndNewlines),
+                grade: Int(components[3].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 8
+            )
+
+            if components.count > 4, let targetScore = Double(components[4]) {
+                student.targetTotalScore = targetScore
+            }
+            if components.count > 5, let turkceNet = Double(components[5]) {
+                student.targetTurkceNet = turkceNet
+            }
+            if components.count > 6, let matematikNet = Double(components[6]) {
+                student.targetMatematikNet = matematikNet
+            }
+
+            modelContext.insert(student)
+        }
+
+        try modelContext.save()
+    }
+
+    private func importJSONData(from url: URL) throws {
+        let data = try Data(contentsOf: url)
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+            throw ImportError.invalidFormat
+        }
+
+        for studentData in json {
+            guard let firstName = studentData["firstName"] as? String,
+                let lastName = studentData["lastName"] as? String
+            else {
+                continue
+            }
+
+            let student = Student(
+                firstName: firstName,
+                lastName: lastName,
+                school: studentData["school"] as? String ?? "",
+                grade: studentData["grade"] as? Int ?? 8,
+                notes: studentData["notes"] as? String ?? ""
+            )
+
+            if let targets = studentData["targets"] as? [String: Any] {
+                student.targetTotalScore = targets["totalScore"] as? Double ?? 400
+                student.targetTurkceNet = targets["turkceNet"] as? Double ?? 15
+                student.targetMatematikNet = targets["matematikNet"] as? Double ?? 15
+                student.targetFenNet = targets["fenNet"] as? Double ?? 15
+                student.targetSosyalNet = targets["sosyalNet"] as? Double ?? 8
+                student.targetDinNet = targets["dinNet"] as? Double ?? 8
+                student.targetIngilizceNet = targets["ingilizceNet"] as? Double ?? 8
+            }
+
+            if let exams = studentData["practiceExams"] as? [[String: Any]] {
+                for examData in exams {
+                    guard let name = examData["name"] as? String,
+                        let totalScore = examData["totalScore"] as? Double
+                    else {
+                        continue
+                    }
+
+                    let exam = PracticeExam(
+                        name: name,
+                        date: parseDate(from: examData["date"] as? String) ?? Date(),
+                        totalScore: totalScore,
+                        notes: examData["notes"] as? String ?? ""
+                    )
+
+                    if let nets = examData["nets"] as? [String: Any] {
+                        exam.turkceNet = nets["turkce"] as? Double ?? 0
+                        exam.matematikNet = nets["matematik"] as? Double ?? 0
+                        exam.fenNet = nets["fen"] as? Double ?? 0
+                        exam.sosyalNet = nets["sosyal"] as? Double ?? 0
+                        exam.dinNet = nets["din"] as? Double ?? 0
+                        exam.ingilizceNet = nets["ingilizce"] as? Double ?? 0
+                    }
+
+                    student.practiceExams.append(exam)
+                }
+            }
+
+            modelContext.insert(student)
+        }
+
+        try modelContext.save()
+    }
+
+    private func parseDate(from string: String?) -> Date? {
+        guard let string = string else { return nil }
+        return ISO8601DateFormatter().date(from: string)
+    }
+
+    enum ImportError: Error {
+        case invalidFormat
     }
 }
 
@@ -267,7 +563,7 @@ struct StudentSelectionView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedStudents: Set<Student>
     @Query(sort: \Student.lastName) private var students: [Student]
-    
+
     var body: some View {
         List(students) { student in
             HStack {
@@ -302,20 +598,67 @@ struct StudentSelectionView: View {
 #Preview {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
     let container = try! ModelContainer(for: Student.self, configurations: config)
-    
+
     // Add example students
     for i in 1...5 {
         let student = Student(
-            firstName: ["Ahmet", "Ayşe", "Mehmet", "Zeynep", "Ali"][i-1],
+            firstName: ["Ahmet", "Ayşe", "Mehmet", "Zeynep", "Ali"][i - 1],
             lastName: "Öğrenci \(i)",
             school: "Örnek Okul",
             grade: 8
         )
         container.mainContext.insert(student)
     }
-    
+
     return NavigationStack {
         SettingsView()
     }
     .modelContainer(container)
+}
+
+// MARK: - Supporting Types
+
+struct ExportDocument: FileDocument {
+    static var readableContentTypes: [UTType] { [.data] }
+
+    var url: URL?
+
+    init(url: URL?) {
+        self.url = url
+    }
+
+    init(configuration: ReadConfiguration) throws {
+        self.url = nil
+    }
+
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        guard let url = url,
+            let data = try? Data(contentsOf: url)
+        else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        return FileWrapper(regularFileWithContents: data)
+    }
+}
+
+// MARK: - Date Formatters
+
+extension DateFormatter {
+    static let filenameDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd_HH-mm"
+        return formatter
+    }()
+
+    static let displayDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy HH:mm"
+        return formatter
+    }()
+
+    static let shortDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy"
+        return formatter
+    }()
 }
