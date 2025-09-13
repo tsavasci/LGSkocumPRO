@@ -339,23 +339,32 @@ struct OverviewTab: View {
 }
 
 struct PracticeExamsTab: View {
+    let student: Student
     @Environment(\.modelContext) private var modelContext
     @State private var showingAddExam = false
     @State private var showingEditExam = false
     @State private var examToEdit: PracticeExam?
     @State private var showingDeleteConfirmation = false
     @State private var examToDelete: PracticeExam?
-    @StateObject private var viewModel: PracticeExamsViewModel
-    @State private var sortedExams: [PracticeExam] = []
     @State private var swipeOffsets: [UUID: CGFloat] = [:]
 
+    @Query private var exams: [PracticeExam]
+
     init(student: Student) {
-        _viewModel = StateObject(wrappedValue: PracticeExamsViewModel(student: student))
+        self.student = student
+        let studentID = student.id
+        _exams = Query(
+            filter: #Predicate<PracticeExam> { exam in
+                exam.student?.id == studentID
+            },
+            sort: \.date,
+            order: .reverse
+        )
     }
 
     var body: some View {
         VStack {
-            if sortedExams.isEmpty {
+            if exams.isEmpty {
                 VStack(spacing: 16) {
                     ContentUnavailableView(
                         "Henüz Deneme Sınavı Yok",
@@ -366,7 +375,7 @@ struct PracticeExamsTab: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 8) {
-                        ForEach(sortedExams) { exam in
+                        ForEach(exams) { exam in
                             examCardWithSwipe(for: exam)
                         }
                     }
@@ -381,23 +390,13 @@ struct PracticeExamsTab: View {
                 }
             }
         }
-        .sheet(
-            isPresented: $showingAddExam,
-            onDismiss: {
-                refreshExams()
-            }
-        ) {
-            AddPracticeExamView(student: viewModel.student)
+        .sheet(isPresented: $showingAddExam) {
+            AddPracticeExamView(student: student)
                 .environment(\.modelContext, modelContext)
         }
-        .sheet(
-            isPresented: $showingEditExam,
-            onDismiss: {
-                refreshExams()
-            }
-        ) {
+        .sheet(isPresented: $showingEditExam) {
             if let examToEdit = examToEdit {
-                EditPracticeExamView(student: viewModel.student, exam: examToEdit)
+                EditPracticeExamView(student: student, exam: examToEdit)
                     .environment(\.modelContext, modelContext)
             }
         }
@@ -413,39 +412,31 @@ struct PracticeExamsTab: View {
             Text("Bu deneme sınavını kalıcı olarak silmek istediğinizden emin misiniz?")
         }
         .onAppear {
-            viewModel.setModelContext(modelContext)
-            refreshExams()
-        }
-        .onChange(of: modelContext) { _, newContext in
-            viewModel.setModelContext(newContext)
+            print("🔄 PracticeExamsTab appeared with \(exams.count) exams")
         }
     }
 
     private func deleteExams(at offsets: IndexSet) {
-        viewModel.deleteExams(at: offsets, modelContext: modelContext)
-        refreshExams()
+        withAnimation {
+            for index in offsets {
+                let exam = exams[index]
+                modelContext.delete(exam)
+            }
+            try? modelContext.save()
+        }
     }
 
     private func deleteExam(_ exam: PracticeExam) {
         withAnimation {
-            // Remove from student's exams
-            if let index = viewModel.student.practiceExams.firstIndex(where: { $0.id == exam.id }) {
-                viewModel.student.practiceExams.remove(at: index)
-            }
             // Delete from context
             modelContext.delete(exam)
             try? modelContext.save()
-            refreshExams()
         }
     }
 
     private func editExam(_ exam: PracticeExam) {
         examToEdit = exam
         showingEditExam = true
-    }
-
-    private func refreshExams() {
-        sortedExams = viewModel.student.practiceExams.sorted { $0.date > $1.date }
     }
 
     @ViewBuilder

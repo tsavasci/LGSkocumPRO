@@ -142,13 +142,6 @@ struct MentorDashboardView: View {
                                 showingReportOptions = true
                             }
 
-                            QuickActionButton(
-                                title: "Toplu Mesaj",
-                                icon: "message.fill",
-                                color: .green
-                            ) {
-                                // Action for bulk message
-                            }
                         }
                         .padding(.horizontal)
                     }
@@ -376,68 +369,71 @@ struct StudentStatusCard: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            // Student Avatar
-            Circle()
-                .fill(Color(.systemGray5))
-                .frame(width: 50, height: 50)
-                .overlay(
-                    Text(student.firstName.prefix(1).uppercased())
-                        .font(.headline.bold())
+        NavigationLink(destination: StudentDetailView(student: student)) {
+            HStack(spacing: 12) {
+                // Student Avatar
+                Circle()
+                    .fill(Color(.systemGray5))
+                    .frame(width: 50, height: 50)
+                    .overlay(
+                        Text(student.firstName.prefix(1).uppercased())
+                            .font(.headline.bold())
+                            .foregroundStyle(.primary)
+                    )
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(student.fullName)
+                        .font(.subheadline.bold())
                         .foregroundStyle(.primary)
-                )
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(student.fullName)
-                    .font(.subheadline.bold())
-                    .foregroundStyle(.primary)
-
-                Text("\(student.school) • \(student.grade). Sınıf")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                Text("Son aktivite: \(lastActivity)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 4) {
-                HStack(spacing: 4) {
-                    Image(systemName: activityStatus.icon)
-                        .foregroundStyle(activityStatus.color)
-                    Text(activityStatus.status)
-                        .font(.caption.bold())
-                        .foregroundStyle(activityStatus.color)
-                }
-
-                VStack(alignment: .trailing, spacing: 2) {
-                    if let avgScore = averageScore {
-                        Text("\(Int(avgScore)) puan ort.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    if student.targetTotalScore > 0 {
-                        Text("Hedef: \(Int(student.targetTotalScore))")
-                            .font(.caption2)
-                            .foregroundStyle(.blue)
-                    }
-                }
-
-                Button(action: onSetGoals) {
-                    Image(systemName: "target")
+                    Text("\(student.school) • \(student.grade). Sınıf")
                         .font(.caption)
-                        .foregroundStyle(.blue)
-                        .padding(4)
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(4)
+                        .foregroundStyle(.secondary)
+
+                    Text("Son aktivite: \(lastActivity)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
-                .buttonStyle(.plain)
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 4) {
+                    HStack(spacing: 4) {
+                        Image(systemName: activityStatus.icon)
+                            .foregroundStyle(activityStatus.color)
+                        Text(activityStatus.status)
+                            .font(.caption.bold())
+                            .foregroundStyle(activityStatus.color)
+                    }
+
+                    VStack(alignment: .trailing, spacing: 2) {
+                        if let avgScore = averageScore {
+                            Text("\(Int(avgScore)) puan ort.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        if student.targetTotalScore > 0 {
+                            Text("Hedef: \(Int(student.targetTotalScore))")
+                                .font(.caption2)
+                                .foregroundStyle(.blue)
+                        }
+                    }
+
+                    Button(action: onSetGoals) {
+                        Image(systemName: "target")
+                            .font(.caption)
+                            .foregroundStyle(.blue)
+                            .padding(4)
+                            .background(Color.blue.opacity(0.1))
+                            .cornerRadius(4)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
+            .padding()
         }
-        .padding()
+        .buttonStyle(.plain)
         .background(Color(.systemBackground))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
