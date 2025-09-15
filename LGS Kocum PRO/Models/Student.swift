@@ -8,6 +8,7 @@ final class Student: Identifiable, ObservableObject {
     var lastName: String
     var school: String
     var grade: Int
+    var branch: String = ""  // Şube bilgisi (A, B, C, etc.)
     var notes: String
     var createdAt: Date
 
@@ -28,13 +29,15 @@ final class Student: Identifiable, ObservableObject {
     @Relationship(deleteRule: .cascade) var questionPerformances = [QuestionPerformance]()
 
     init(
-        firstName: String, lastName: String, school: String = "", grade: Int = 8, notes: String = ""
+        firstName: String, lastName: String, school: String = "", grade: Int = 8,
+        branch: String = "", notes: String = ""
     ) {
         self.id = UUID()
         self.firstName = firstName
         self.lastName = lastName
         self.school = school
         self.grade = grade
+        self.branch = branch
         self.notes = notes
         self.createdAt = Date()
     }

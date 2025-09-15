@@ -386,9 +386,15 @@ struct StudentStatusCard: View {
                         .font(.subheadline.bold())
                         .foregroundStyle(.primary)
 
-                    Text("\(student.school) • \(student.grade). Sınıf")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if !student.branch.isEmpty {
+                        Text("\(student.school) • \(student.grade). Sınıf \(student.branch)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("\(student.school) • \(student.grade). Sınıf")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
 
                     Text("Son aktivite: \(lastActivity)")
                         .font(.caption)
@@ -548,13 +554,27 @@ struct SetGoalsView: View {
                             .font(.headline)
 
                         if !student.school.isEmpty {
-                            Text("\(student.school) • \(student.grade). Sınıf")
+                            if !student.branch.isEmpty {
+                                Text(
+                                    "\(student.school) • \(student.grade). Sınıf \(student.branch)"
+                                )
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
+                            } else {
+                                Text("\(student.school) • \(student.grade). Sınıf")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
                         } else {
-                            Text("\(student.grade). Sınıf")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                            if !student.branch.isEmpty {
+                                Text("\(student.grade). Sınıf \(student.branch)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            } else {
+                                Text("\(student.grade). Sınıf")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                     }
                     .padding(.vertical, 4)

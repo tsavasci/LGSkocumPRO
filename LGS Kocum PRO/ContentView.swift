@@ -5,8 +5,8 @@
 //  Created by Tamer Savaşcı on 11.09.2025.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct ContentView: View {
     var body: some View {
@@ -16,9 +16,10 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: [
-            Student.self,
-            PracticeExam.self,
-            QuestionPerformance.self
-        ], inMemory: true)
+        .modelContainer(
+            for: [
+                Student.self,
+                PracticeExam.self,
+                QuestionPerformance.self,
+            ], inMemory: true)
 }

@@ -134,6 +134,7 @@ struct SettingsView: View {
             print("Failed to reset data: \(error.localizedDescription)")
         }
     }
+
 }
 
 // MARK: - Supporting Views
@@ -391,13 +392,73 @@ struct ImportDataView: View {
                             Text(format.rawValue).tag(format)
                         }
                     }
-                }
 
-                Section {
-                    Button("Dosya Seç") {
-                        isImporting = true
+                    Section(header: Text("Dosya Formatı Örneği")) {
+                        if importFormat == .csv {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("CSV Başlık Satırı:")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.secondary)
+
+                                Text("Ad,Soyad,Okul,Sınıf,Şube,Notlar")
+                                    .font(.system(.caption, design: .monospaced))
+                                    .foregroundStyle(.primary)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(4)
+
+                                Text("Örnek:")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.secondary)
+
+                                Text("Ahmet,Yılmaz,Atatürk Ortaokulu,8,A,İyi çalışıyor")
+                                    .font(.system(.caption, design: .monospaced))
+                                    .foregroundStyle(.primary)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(4)
+                            }
+                        } else {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("JSON Örneği:")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.secondary)
+
+                                Text(
+                                    """
+                                    [
+                                      {
+                                        "firstName": "Ahmet",
+                                        "lastName": "Yılmaz",
+                                        "school": "Atatürk Ortaokulu",
+                                        "grade": 8,
+                                        "branch": "A",
+                                        "notes": "İyi çalışıyor"
+                                      }
+                                    ]
+                                    """
+                                )
+                                .font(.system(.caption, design: .monospaced))
+                                .foregroundStyle(.primary)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 8)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(4)
+                            }
+                        }
                     }
-                    .frame(maxWidth: .infinity)
+
+                    Section {
+                        Button("Dosya Seç") {
+                            isImporting = true
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
                 }
             }
             .navigationTitle("Veri İçe Aktar")
@@ -421,12 +482,13 @@ struct ImportDataView: View {
                     }
                 case .failure(let error):
                     print("Error selecting file: \(error.localizedDescription)")
+                    isImporting = false
                 }
             }
         }
     }
 
-    private func importData(from url: URL) {
+    func importData(from url: URL) {
         guard url.startAccessingSecurityScopedResource() else {
             print("Could not access file")
             return
@@ -437,54 +499,60 @@ struct ImportDataView: View {
         }
 
         do {
+            var importedCount = 0
+
             switch importFormat {
             case .csv:
-                try importCSVData(from: url)
+                importedCount = try importCSVData(from: url)
             case .json:
-                try importJSONData(from: url)
+                importedCount = try importJSONData(from: url)
             }
+
             print("Data imported successfully from \(url.lastPathComponent)")
+
+            // Show success alert or message
+            // In a full implementation, you'd add a state variable and alert here
+            print("Başarıyla \(importedCount) öğrenci içe aktarıldı")
         } catch {
             print("Import failed: \(error.localizedDescription)")
+            // Show error alert or message
         }
 
         dismiss()
     }
 
-    private func importCSVData(from url: URL) throws {
+    func importCSVData(from url: URL) throws -> Int {
         let content = try String(contentsOf: url, encoding: .utf8)
         let lines = content.components(separatedBy: .newlines).filter { !$0.isEmpty }
 
-        guard lines.count > 1 else { return }
+        guard lines.count > 1 else { return 0 }
 
         for line in lines.dropFirst() {
             let components = line.components(separatedBy: ",")
-            guard components.count >= 4 else { continue }
+            guard components.count >= 2 else { continue }
 
             let student = Student(
                 firstName: components[0].trimmingCharacters(in: .whitespacesAndNewlines),
                 lastName: components[1].trimmingCharacters(in: .whitespacesAndNewlines),
-                school: components[2].trimmingCharacters(in: .whitespacesAndNewlines),
-                grade: Int(components[3].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 8
+                school: components.count > 2
+                    ? components[2].trimmingCharacters(in: .whitespacesAndNewlines) : "",
+                grade: components.count > 3
+                    ? (Int(components[3].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 8) : 8,
+                branch: components.count > 4
+                    ? components[4].trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+                    : "",
+                notes: components.count > 5
+                    ? components[5].trimmingCharacters(in: .whitespacesAndNewlines) : ""
             )
-
-            if components.count > 4, let targetScore = Double(components[4]) {
-                student.targetTotalScore = targetScore
-            }
-            if components.count > 5, let turkceNet = Double(components[5]) {
-                student.targetTurkceNet = turkceNet
-            }
-            if components.count > 6, let matematikNet = Double(components[6]) {
-                student.targetMatematikNet = matematikNet
-            }
 
             modelContext.insert(student)
         }
 
         try modelContext.save()
+        return lines.count - 1  // Number of imported students (excluding header)
     }
 
-    private func importJSONData(from url: URL) throws {
+    func importJSONData(from url: URL) throws -> Int {
         let data = try Data(contentsOf: url)
         guard let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
             throw ImportError.invalidFormat
@@ -502,54 +570,18 @@ struct ImportDataView: View {
                 lastName: lastName,
                 school: studentData["school"] as? String ?? "",
                 grade: studentData["grade"] as? Int ?? 8,
+                branch: (studentData["branch"] as? String ?? "").uppercased(),
                 notes: studentData["notes"] as? String ?? ""
             )
-
-            if let targets = studentData["targets"] as? [String: Any] {
-                student.targetTotalScore = targets["totalScore"] as? Double ?? 400
-                student.targetTurkceNet = targets["turkceNet"] as? Double ?? 15
-                student.targetMatematikNet = targets["matematikNet"] as? Double ?? 15
-                student.targetFenNet = targets["fenNet"] as? Double ?? 15
-                student.targetSosyalNet = targets["sosyalNet"] as? Double ?? 8
-                student.targetDinNet = targets["dinNet"] as? Double ?? 8
-                student.targetIngilizceNet = targets["ingilizceNet"] as? Double ?? 8
-            }
-
-            if let exams = studentData["practiceExams"] as? [[String: Any]] {
-                for examData in exams {
-                    guard let name = examData["name"] as? String,
-                        let totalScore = examData["totalScore"] as? Double
-                    else {
-                        continue
-                    }
-
-                    let exam = PracticeExam(
-                        name: name,
-                        date: parseDate(from: examData["date"] as? String) ?? Date(),
-                        totalScore: totalScore,
-                        notes: examData["notes"] as? String ?? ""
-                    )
-
-                    if let nets = examData["nets"] as? [String: Any] {
-                        exam.turkceNet = nets["turkce"] as? Double ?? 0
-                        exam.matematikNet = nets["matematik"] as? Double ?? 0
-                        exam.fenNet = nets["fen"] as? Double ?? 0
-                        exam.sosyalNet = nets["sosyal"] as? Double ?? 0
-                        exam.dinNet = nets["din"] as? Double ?? 0
-                        exam.ingilizceNet = nets["ingilizce"] as? Double ?? 0
-                    }
-
-                    student.practiceExams.append(exam)
-                }
-            }
 
             modelContext.insert(student)
         }
 
         try modelContext.save()
+        return json.count  // Number of imported students
     }
 
-    private func parseDate(from string: String?) -> Date? {
+    func parseDate(from string: String?) -> Date? {
         guard let string = string else { return nil }
         return ISO8601DateFormatter().date(from: string)
     }

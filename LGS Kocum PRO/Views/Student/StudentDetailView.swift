@@ -22,13 +22,21 @@ struct StudentDetailView: View {
                 Text(student.fullName)
                     .font(.title2.bold())
 
-                Text(student.school)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                if !student.school.isEmpty {
+                    Text(student.school)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
 
-                Text("\(student.grade). Sınıf")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                if !student.branch.isEmpty {
+                    Text("\(student.grade). Sınıf \(student.branch)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("\(student.grade). Sınıf")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding()
             .frame(maxWidth: .infinity)
@@ -138,7 +146,7 @@ struct OverviewTab: View {
                     .padding(.horizontal)
                 } else {
                     Chart {
-                        ForEach(Array(recentExams.enumerated().reversed()), id: \.offset) {
+                        ForEach(Array(recentExams.reversed().enumerated()), id: \.offset) {
                             index, exam in
                             LineMark(
                                 x: .value("Sınav", index + 1),
