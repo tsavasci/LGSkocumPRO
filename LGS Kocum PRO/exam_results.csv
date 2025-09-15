@@ -1,0 +1,51 @@
+ÖğrenciAdı,ÖğrenciSoyadı,SınavAdı,Tarih,ToplamPuan,TürkçeNet,MatematikNet,FenNet,SosyalNet,DinNet,İngilizceNet,Notlar
+Ahmet,Yılmaz,Deneme Sınavı 1,2024-01-15,385.5,14.5,13.2,15.0,7.8,7.2,6.5,İyi performans
+Ayşe,Kaya,Deneme Sınavı 1,2024-01-15,420.8,16.2,15.5,14.8,8.5,8.0,7.8,Çok başarılı
+Mehmet,Demir,Deneme Sınavı 1,2024-01-15,298.4,11.5,9.8,12.2,6.5,5.8,5.2,Gelişim gösteriyor
+Zeynep,Özkan,Deneme Sınavı 1,2024-01-15,445.2,17.8,16.5,15.5,9.2,8.8,8.5,Mükemmel sonuç
+Ali,Şahin,Deneme Sınavı 1,2024-01-15,365.7,13.8,12.5,14.2,7.2,6.8,6.0,Orta seviye
+Fatma,Çelik,Deneme Sınavı 1,2024-01-15,402.1,15.5,14.8,15.2,8.2,7.5,7.2,Başarılı
+Hasan,Koç,Deneme Sınavı 1,2024-01-15,325.6,12.2,10.5,13.5,6.8,6.2,5.8,Matematik zayıf
+Elif,Arslan,Deneme Sınavı 1,2024-01-15,458.9,18.2,17.5,16.2,9.5,9.2,9.0,Üstün başarı
+İbrahim,Aydın,Deneme Sınavı 1,2024-01-15,312.3,11.8,9.2,12.8,6.2,5.5,5.0,Çalışma gerekli
+Seda,Polat,Deneme Sınavı 1,2024-01-15,378.4,14.2,13.0,14.5,7.5,7.0,6.8,Dengeli performans
+Ahmet,Yılmaz,Deneme Sınavı 2,2024-02-15,395.2,15.2,14.0,15.5,8.0,7.5,6.8,Gelişim var
+Ayşe,Kaya,Deneme Sınavı 2,2024-02-15,435.6,17.0,16.2,15.2,8.8,8.5,8.2,Sürekli başarı
+Mehmet,Demir,Deneme Sınavı 2,2024-02-15,318.7,12.8,11.2,13.0,7.0,6.2,5.8,İlerleme kaydediyor
+Zeynep,Özkan,Deneme Sınavı 2,2024-02-15,452.8,18.5,17.0,16.0,9.5,9.0,8.8,Mükemmel düzey
+Ali,Şahin,Deneme Sınavı 2,2024-02-15,348.9,14.0,13.2,13.8,7.5,6.5,6.2,Matematik gelişti
+Fatma,Çelik,Deneme Sınavı 2,2024-02-15,412.5,16.0,15.2,15.8,8.5,8.0,7.8,Çok iyi
+Hasan,Koç,Deneme Sınavı 2,2024-02-15,335.4,12.8,11.0,14.0,7.2,6.8,6.0,Matematik hala zayıf
+Elif,Arslan,Deneme Sınavı 2,2024-02-15,465.3,18.8,18.0,16.5,9.8,9.5,9.2,Üstün performans
+İbrahim,Aydın,Deneme Sınavı 2,2024-02-15,325.8,12.5,10.0,13.2,6.8,6.0,5.5,Yavaş gelişim
+Seda,Polat,Deneme Sınavı 2,2024-02-15,385.7,14.8,13.5,15.0,8.0,7.2,7.0,İstikrarlı
+Mustafa,Erdoğan,Deneme Sınavı 1,2024-01-15,356.4,13.5,12.0,13.8,7.0,6.5,6.0,Orta seviye
+Hatice,Yıldız,Deneme Sınavı 1,2024-01-15,389.2,14.8,13.8,14.2,7.8,7.2,6.8,İyi performans
+Osman,Kurt,Deneme Sınavı 1,2024-01-15,425.6,16.5,15.8,15.5,8.8,8.2,7.5,Çok başarılı
+Merve,Güler,Deneme Sınavı 1,2024-01-15,298.7,11.2,9.5,12.5,6.2,5.8,5.0,Gelişim gerekli
+Emre,Özdemir,Deneme Sınavı 1,2024-01-15,372.9,14.0,12.8,14.8,7.5,6.8,6.5,Dengeli
+Mustafa,Erdoğan,Deneme Sınavı 2,2024-02-15,368.1,14.2,12.8,14.0,7.5,7.0,6.2,Gelişim gösteriyor
+Hatice,Yıldız,Deneme Sınavı 2,2024-02-15,398.5,15.5,14.2,14.8,8.2,7.8,7.2,İyi gelişim
+Osman,Kurt,Deneme Sınavı 2,2024-02-15,438.2,17.2,16.5,16.0,9.0,8.5,8.0,Sürekli başarı
+Merve,Güler,Deneme Sınavı 2,2024-02-15,312.4,12.0,10.2,13.0,6.8,6.0,5.5,Yavaş gelişim
+Emre,Özdemir,Deneme Sınavı 2,2024-02-15,385.6,14.8,13.5,15.2,8.0,7.5,7.0,İstikrarlı gelişim
+Büşra,Türk,Deneme Sınavı 1,2024-01-15,415.3,15.8,15.2,15.0,8.5,8.0,7.8,Çok iyi
+Serkan,Aslan,Deneme Sınavı 1,2024-01-15,345.7,13.2,11.8,13.5,7.0,6.2,5.8,Orta düzey
+Esra,Öztürk,Deneme Sınavı 1,2024-01-15,392.4,15.0,14.0,14.5,7.8,7.5,7.0,İyi sonuç
+Burak,Kılıç,Deneme Sınavı 1,2024-01-15,428.9,16.8,16.0,15.8,8.5,8.2,8.0,Çok başarılı
+Gizem,Doğan,Deneme Sınavı 1,2024-01-15,305.2,11.8,9.0,12.8,6.5,5.5,5.2,Çalışma gerekli
+Büşra,Türk,Deneme Sınavı 2,2024-02-15,425.8,16.5,15.8,15.5,8.8,8.5,8.2,Sürekli gelişim
+Serkan,Aslan,Deneme Sınavı 2,2024-02-15,358.3,13.8,12.5,14.0,7.2,6.8,6.5,Gelişim var
+Esra,Öztürk,Deneme Sınavı 2,2024-02-15,405.1,15.8,14.8,15.0,8.2,8.0,7.5,İyi gelişim
+Burak,Kılıç,Deneme Sınavı 2,2024-02-15,442.6,17.5,16.8,16.2,9.2,8.8,8.5,Mükemmel gelişim
+Gizem,Doğan,Deneme Sınavı 2,2024-02-15,318.9,12.5,9.8,13.2,7.0,6.2,5.8,Yavaş ama istikrarlı
+Onur,Yavuz,Deneme Sınavı 1,2024-01-15,367.8,13.8,12.2,14.2,7.2,6.8,6.0,Dengeli performans
+Cansu,Özer,Deneme Sınavı 1,2024-01-15,448.7,17.5,17.2,16.0,9.0,8.8,8.5,Üstün başarı
+Kemal,Eren,Deneme Sınavı 1,2024-01-15,322.5,12.0,10.5,12.8,6.5,5.8,5.2,Gelişim gerekli
+İrem,Topal,Deneme Sınavı 1,2024-01-15,395.6,15.2,14.2,14.8,8.0,7.2,7.0,İyi seviye
+Tolga,Aksoy,Deneme Sınavı 1,2024-01-15,378.9,14.5,13.0,14.5,7.5,7.0,6.5,Orta üstü
+Onur,Yavuz,Deneme Sınavı 2,2024-02-15,382.4,14.5,13.0,14.8,7.8,7.2,6.8,Gelişim gösteriyor
+Cansu,Özer,Deneme Sınavı 2,2024-02-15,456.2,18.0,17.8,16.5,9.2,9.0,8.8,Mükemmel seviye
+Kemal,Eren,Deneme Sınavı 2,2024-02-15,338.7,12.8,11.2,13.5,7.0,6.5,5.8,Yavaş gelişim
+İrem,Topal,Deneme Sınavı 2,2024-02-15,408.3,15.8,14.8,15.2,8.5,7.8,7.5,İyi gelişim
+Tolga,Aksoy,Deneme Sınavı 2,2024-02-15,392.1,15.0,13.8,15.0,8.0,7.5,7.2,İstikrarlı gelişim

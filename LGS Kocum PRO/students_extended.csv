@@ -1,0 +1,52 @@
+Ad,Soyad,Okul,Sınıf,Şube,Hedef Toplam,Hedef Türkçe,Hedef Matematik,Hedef Fen,Hedef Sosyal,Hedef Din,Hedef İngilizce,Notlar
+Ahmet,Yılmaz,Atatürk Ortaokulu,8,A,450,16,15,15,8,8,7,Matematik güçlü öğrenci
+Ayşe,Kaya,Fatih Sultan Mehmet Ortaokulu,7,B,420,15,14,16,9,7,8,Fen derslerinde başarılı
+Mehmet,Demir,Atatürk Ortaokulu,6,C,380,13,12,14,7,6,6,Orta seviye hedef
+Zeynep,Özkan,Fatih Sultan Mehmet Ortaokulu,8,D,480,18,16,16,9,8,8,Çok başarılı öğrenci
+Ali,Şahin,Atatürk Ortaokulu,7,E,350,12,11,13,7,6,5,Çalışmaya odaklanmalı
+Fatma,Çelik,Fatih Sultan Mehmet Ortaokulu,6,F,400,14,13,15,8,7,7,Dengeli hedef
+Hasan,Koç,Atatürk Ortaokulu,8,A,360,13,10,14,7,6,6,Matematik zayıf
+Elif,Arslan,Fatih Sultan Mehmet Ortaokulu,7,B,500,19,18,17,10,9,9,Üstün yetenekli
+İbrahim,Aydın,Atatürk Ortaokulu,6,C,320,11,9,12,6,5,4,Temel seviye
+Seda,Polat,Fatih Sultan Mehmet Ortaokulu,8,D,410,15,14,15,8,7,7,İstikrarlı öğrenci
+Mustafa,Erdoğan,Atatürk Ortaokulu,7,E,375,13,12,14,7,6,6,Orta üstü hedef
+Hatice,Yıldız,Fatih Sultan Mehmet Ortaokulu,6,F,390,14,13,14,8,7,6,İyi seviye
+Osman,Kurt,Atatürk Ortaokulu,8,A,440,16,15,16,9,8,8,Çok başarılı
+Merve,Güler,Fatih Sultan Mehmet Ortaokulu,7,B,310,11,9,12,6,5,4,Gelişim gerekli
+Emre,Özdemir,Atatürk Ortaokulu,6,C,385,14,12,14,7,6,6,Dengeli performans
+Büşra,Türk,Fatih Sultan Mehmet Ortaokulu,8,D,425,15,14,15,8,7,8,İyi hedefli öğrenci
+Serkan,Aslan,Atatürk Ortaokulu,7,E,340,12,10,13,6,5,5,Motivasyon gerekli
+Esra,Öztürk,Fatih Sultan Mehmet Ortaokulu,6,F,395,14,13,15,8,7,7,İyi çalışan öğrenci
+Burak,Kılıç,Atatürk Ortaokulu,8,A,460,17,16,16,9,8,8,Çok başarılı öğrenci
+Gizem,Doğan,Fatih Sultan Mehmet Ortaokulu,7,B,305,11,8,12,6,5,4,Temel düzey hedef
+Onur,Yavuz,Atatürk Ortaokulu,6,C,370,13,11,14,7,6,6,Orta seviye
+Cansu,Özer,Fatih Sultan Mehmet Ortaokulu,8,D,490,18,17,17,10,9,9,Üstün başarılı
+Kemal,Eren,Atatürk Ortaokulu,7,E,330,12,9,13,6,5,5,Gelişim odaklı
+İrem,Topal,Fatih Sultan Mehmet Ortaokulu,6,F,405,15,13,15,8,7,7,İyi seviye hedef
+Tolga,Aksoy,Atatürk Ortaokulu,8,A,380,14,12,14,7,6,6,Orta üstü
+Pınar,Kaplan,Fatih Sultan Mehmet Ortaokulu,7,B,415,15,14,15,8,7,8,İyi performans beklentisi
+Cem,Yılmaz,Atatürk Ortaokulu,6,C,345,12,10,13,6,5,5,Temel seviye üstü
+Nihan,Duman,Fatih Sultan Mehmet Ortaokulu,8,D,435,16,15,16,9,8,7,Yüksek hedef
+Deniz,Mutlu,Atatürk Ortaokulu,7,E,365,13,11,14,7,6,6,Orta seviye hedef
+Gamze,Sönmez,Fatih Sultan Mehmet Ortaokulu,6,F,390,14,12,15,8,7,6,Dengeli yaklaşım
+Bora,Çakır,Atatürk Ortaokulu,8,A,420,15,13,15,8,7,7,İyi hedef belirlemiş
+Selin,Tunç,Fatih Sultan Mehmet Ortaokulu,7,B,355,13,10,13,7,6,5,Orta seviye
+Kaan,Bulut,Atatürk Ortaokulu,6,C,375,13,11,14,7,6,6,Orta üstü hedef
+Duygu,Kök,Fatih Sultan Mehmet Ortaokulu,8,D,445,16,15,16,9,8,8,Yüksek başarı beklentisi
+Murat,Korkmaz,Atatürk Ortaokulu,7,E,335,12,9,13,6,5,5,Temel seviye
+Ceyda,Başak,Fatih Sultan Mehmet Ortaokulu,6,F,400,14,13,15,8,7,7,İyi seviye hedef
+Barış,Güven,Atatürk Ortaokulu,8,A,395,14,12,15,8,7,6,Dengeli hedef
+Sevgi,Altın,Fatih Sultan Mehmet Ortaokulu,7,B,410,15,13,15,8,7,7,İyi performans hedefi
+Tuna,Kara,Atatürk Ortaokulu,6,C,350,12,10,13,7,6,5,Orta seviye
+Derya,İnan,Fatih Sultan Mehmet Ortaokulu,8,D,430,16,14,16,8,8,7,Yüksek hedefli
+Volkan,Sezer,Atatürk Ortaokulu,7,E,360,13,11,14,7,6,6,Orta seviye hedef
+Aslı,Bozkurt,Fatih Sultan Mehmet Ortaokulu,6,F,385,14,12,14,7,6,6,Dengeli yaklaşım
+Engin,Taş,Atatürk Ortaokulu,8,A,450,17,15,16,9,8,8,Yüksek başarı beklentisi
+Neslihan,Çiftçi,Fatih Sultan Mehmet Ortaokulu,7,B,325,11,9,12,6,5,4,Temel seviye hedef
+Ömer,Gündüz,Atatürk Ortaokulu,6,C,370,13,11,14,7,6,6,Orta seviye
+Burcu,Yıldırım,Fatih Sultan Mehmet Ortaokulu,8,D,415,15,13,15,8,7,7,İyi hedefli öğrenci
+Erhan,Özkaya,Atatürk Ortaokulu,7,E,345,12,10,13,6,5,5,Gelişim odaklı
+Özlem,Acar,Fatih Sultan Mehmet Ortaokulu,6,F,395,14,12,15,8,7,7,İyi seviye
+Taylan,Keskin,Atatürk Ortaokulu,8,A,425,15,14,15,8,7,8,Yüksek hedef
+Nazlı,Işık,Fatih Sultan Mehmet Ortaokulu,7,B,380,14,12,14,7,6,6,Orta üstü
+Alper,Uzun,Atatürk Ortaokulu,6,C,355,12,10,13,7,6,5,Orta seviye hedef

@@ -1,0 +1,51 @@
+Öğrenci,ÖğrenciSoyadı,Ders,Konu,DoğruSayısı,YanlışSayısı,BoşSayısı,Süre,Notlar,Tarih
+Ahmet,Yılmaz,Matematik,Cebirsel İfadeler,12,3,5,25,Konu eksikleri var,2024-01-20
+Ahmet,Yılmaz,Türkçe,Okuduğunu Anlama,15,2,3,30,İyi performans,2024-01-22
+Ayşe,Kaya,Fen Bilimleri,Kuvvet ve Hareket,18,1,1,28,Mükemmel anlama,2024-01-21
+Ayşe,Kaya,Matematik,Geometri,16,2,2,32,Çok başarılı,2024-01-23
+Zeynep,Özkan,Türkçe,Yazım Kuralları,19,0,1,22,Tam puan yakın,2024-01-25
+Zeynep,Özkan,Matematik,Problemler,17,1,2,35,Problem çözme yetisi güçlü,2024-01-26
+Ali,Şahin,Sosyal Bilgiler,Tarih,10,5,5,40,Tarih konularında zorlanıyor,2024-01-24
+Ali,Şahin,Matematik,Cebirsel İfadeler,8,7,5,45,Matematik desteği gerekli,2024-01-27
+Elif,Arslan,İngilizce,Grammar,18,0,2,20,İngilizce çok güçlü,2024-01-28
+Elif,Arslan,Fen Bilimleri,Elektrik,19,1,0,25,Fen konularında üstün,2024-01-29
+Fatma,Çelik,Matematik,Kesirler,14,3,3,28,İyi seviye,2024-01-30
+Fatma,Çelik,Türkçe,Dil Bilgisi,16,2,2,26,Başarılı performans,2024-02-01
+Hasan,Koç,Matematik,Denklemler,9,6,5,38,Matematik zayıf,2024-01-31
+Hasan,Koç,Fen Bilimleri,Madde ve Isı,12,4,4,35,Orta seviye,2024-02-02
+İbrahim,Aydın,Sosyal Bilgiler,Coğrafya,8,7,5,42,Coğrafya desteği gerekli,2024-02-03
+İbrahim,Aydın,Türkçe,Okuduğunu Anlama,10,5,5,40,Gelişim gerekli,2024-02-04
+Seda,Polat,Matematik,Geometri,15,3,2,30,Dengeli performans,2024-02-05
+Seda,Polat,Fen Bilimleri,Işık,16,2,2,27,İyi anlama,2024-02-06
+Mustafa,Erdoğan,İngilizce,Vocabulary,11,4,5,35,İngilizce orta,2024-02-07
+Mustafa,Erdoğan,Matematik,Problemler,13,4,3,33,Problem çözme gelişiyor,2024-02-08
+Hatice,Yıldız,Türkçe,Edebiyat,17,2,1,24,Edebiyat güçlü,2024-02-09
+Hatice,Yıldız,Sosyal Bilgiler,Vatandaşlık,14,3,3,32,İyi seviye,2024-02-10
+Osman,Kurt,Matematik,İstatistik,16,2,2,29,İstatistik başarılı,2024-02-11
+Osman,Kurt,Fen Bilimleri,Ses,17,1,2,26,Fen güçlü,2024-02-12
+Merve,Güler,Din Kültürü,İbadetler,9,6,5,38,Din dersi zayıf,2024-02-13
+Merve,Güler,Türkçe,Yazım Kuralları,11,4,5,37,Yazım kuralları eksik,2024-02-14
+Emre,Özdemir,Matematik,Fonksiyonlar,14,3,3,31,Fonksiyonlar orta,2024-02-15
+Emre,Özdemir,Fen Bilimleri,Basınç,15,2,3,29,Fen başarılı,2024-02-16
+Büşra,Türk,İngilizce,Reading,16,2,2,25,İngilizce okuma güçlü,2024-02-17
+Büşra,Türk,Matematik,Üslü Sayılar,15,3,2,28,Üslü sayılar iyi,2024-02-18
+Serkan,Aslan,Sosyal Bilgiler,Ekonomi,10,5,5,40,Ekonomi konuları zor,2024-02-19
+Serkan,Aslan,Türkçe,Fiil Çekimleri,12,4,4,34,Fiil çekimleri orta,2024-02-20
+Esra,Öztürk,Fen Bilimleri,DNA,18,1,1,23,DNA konusu mükemmel,2024-02-21
+Esra,Öztürk,Matematik,Olasılık,16,2,2,27,Olasılık başarılı,2024-02-22
+Burak,Kılıç,Din Kültürü,Peygamberler,17,1,2,24,Din dersi güçlü,2024-02-23
+Burak,Kılıç,İngilizce,Grammar,17,1,2,22,İngilizce mükemmel,2024-02-24
+Gizem,Doğan,Türkçe,Anlam Bilgisi,9,6,5,41,Anlam bilgisi zayıf,2024-02-25
+Gizem,Doğan,Matematik,Kesirler,8,7,5,43,Kesirler çok zayıf,2024-02-26
+Onur,Yavuz,Fen Bilimleri,Kalıtım,14,3,3,30,Kalıtım konusu iyi,2024-02-27
+Onur,Yavuz,Sosyal Bilgiler,Türk Tarihi,13,4,3,33,Türk tarihi orta,2024-02-28
+Cansu,Özer,Matematik,Analitik Geometri,18,1,1,21,Analitik geometri üstün,2024-03-01
+Cansu,Özer,Türkçe,Kompozisyon,19,0,1,20,Kompozisyon mükemmel,2024-03-02
+Kemal,Eren,İngilizce,Listening,9,5,6,39,İngilizce dinleme zayıf,2024-03-03
+Kemal,Eren,Fen Bilimleri,Kimya,11,4,5,36,Kimya orta seviye,2024-03-04
+İrem,Topal,Sosyal Bilgiler,Dünya Tarihi,15,3,2,28,Dünya tarihi başarılı,2024-03-05
+İrem,Topal,Matematik,Trigonometri,16,2,2,26,Trigonometri güçlü,2024-03-06
+Tolga,Aksoy,Din Kültürü,Ahlak,14,3,3,31,Ahlak konuları iyi,2024-03-07
+Tolga,Aksoy,Türkçe,Şiir Analizi,15,2,3,29,Şiir analizi başarılı,2024-03-08
+Pınar,Kaplan,Fen Bilimleri,Ekosistem,17,2,1,24,Ekosistem mükemmel,2024-03-09
+Pınar,Kaplan,İngilizce,Writing,16,2,2,25,İngilizce yazma güçlü,2024-03-10

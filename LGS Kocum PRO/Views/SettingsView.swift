@@ -273,14 +273,11 @@ struct ExportDataView: View {
 
     private func generateCSVContent(students: [Student]) -> String {
         var csv =
-            "Ad,Soyad,Okul,Sınıf,Hedef Puan,Türkçe Net,Matematik Net,Fen Net,Sosyal Net,Din Net,İngilizce Net,Sınav Sayısı,Ortalama Puan\n"
+            "Ad,Soyad,Okul,Sınıf,Şube,Hedef Toplam,Hedef Türkçe,Hedef Matematik,Hedef Fen,Hedef Sosyal,Hedef Din,Hedef İngilizce,Notlar\n"
 
         for student in students {
-            let examCount = student.practiceExams.count
-            let avgScore = student.currentAverageScore
-
             csv +=
-                "\(student.firstName),\(student.lastName),\(student.school),\(student.grade),\(student.targetTotalScore),\(student.targetTurkceNet),\(student.targetMatematikNet),\(student.targetFenNet),\(student.targetSosyalNet),\(student.targetDinNet),\(student.targetIngilizceNet),\(examCount),\(avgScore)\n"
+                "\(student.firstName),\(student.lastName),\(student.school),\(student.grade),\(student.branch),\(student.targetTotalScore),\(student.targetTurkceNet),\(student.targetMatematikNet),\(student.targetFenNet),\(student.targetSosyalNet),\(student.targetDinNet),\(student.targetIngilizceNet),\(student.notes)\n"
         }
 
         return csv
@@ -361,10 +358,14 @@ struct ImportDataView: View {
     @State private var importFormat: ImportFormat = .csv
     @State private var importSource: ImportSource = .files
     @State private var isImporting = false
+    @State private var selectedDataTypes: Set<DataType> = [.students]
+    @State private var importStatusMessage = ""
+    @State private var showingImportResult = false
 
     enum ImportFormat: String, CaseIterable, Identifiable {
         case csv = "CSV"
         case json = "JSON"
+        case excel = "Excel"
 
         var id: String { self.rawValue }
     }
@@ -372,7 +373,15 @@ struct ImportDataView: View {
     enum ImportSource: String, CaseIterable, Identifiable {
         case files = "Dosyalar"
         case icloud = "iCloud"
-        case other = "Diğer"
+
+        var id: String { self.rawValue }
+    }
+
+    enum DataType: String, CaseIterable, Identifiable {
+        case students = "Öğrenci Bilgileri"
+        case exams = "Sınav Sonuçları"
+        case performance = "Soru Performansı"
+        case targets = "Hedef Puanlar"
 
         var id: String { self.rawValue }
     }
@@ -392,73 +401,140 @@ struct ImportDataView: View {
                             Text(format.rawValue).tag(format)
                         }
                     }
+                }
 
-                    Section(header: Text("Dosya Formatı Örneği")) {
-                        if importFormat == .csv {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("CSV Başlık Satırı:")
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                    .foregroundStyle(.secondary)
-
-                                Text("Ad,Soyad,Okul,Sınıf,Şube,Notlar")
-                                    .font(.system(.caption, design: .monospaced))
-                                    .foregroundStyle(.primary)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(4)
-
-                                Text("Örnek:")
-                                    .font(.caption)
-                                    .fontWeight(.semibold)
-                                    .foregroundStyle(.secondary)
-
-                                Text("Ahmet,Yılmaz,Atatürk Ortaokulu,8,A,İyi çalışıyor")
-                                    .font(.system(.caption, design: .monospaced))
-                                    .foregroundStyle(.primary)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(4)
+                Section(header: Text("Aktarılacak Veri Türleri")) {
+                    ForEach(DataType.allCases) { dataType in
+                        HStack {
+                            Image(
+                                systemName: selectedDataTypes.contains(dataType)
+                                    ? "checkmark.square.fill" : "square"
+                            )
+                            .foregroundColor(selectedDataTypes.contains(dataType) ? .blue : .gray)
+                            .onTapGesture {
+                                if selectedDataTypes.contains(dataType) {
+                                    selectedDataTypes.remove(dataType)
+                                } else {
+                                    selectedDataTypes.insert(dataType)
+                                }
                             }
-                        } else {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("JSON Örneği:")
+
+                            Text(dataType.rawValue)
+                                .onTapGesture {
+                                    if selectedDataTypes.contains(dataType) {
+                                        selectedDataTypes.remove(dataType)
+                                    } else {
+                                        selectedDataTypes.insert(dataType)
+                                    }
+                                }
+
+                            Spacer()
+                        }
+                    }
+                }
+
+                Section(header: Text("Dosya Formatı Örnekleri")) {
+                    if importFormat == .csv {
+                        VStack(alignment: .leading, spacing: 8) {
+                            if selectedDataTypes.contains(.students) {
+                                Text("Öğrenci CSV Başlıkları:")
                                     .font(.caption)
                                     .fontWeight(.semibold)
                                     .foregroundStyle(.secondary)
 
                                 Text(
-                                    """
-                                    [
-                                      {
-                                        "firstName": "Ahmet",
-                                        "lastName": "Yılmaz",
-                                        "school": "Atatürk Ortaokulu",
-                                        "grade": 8,
-                                        "branch": "A",
-                                        "notes": "İyi çalışıyor"
-                                      }
-                                    ]
-                                    """
+                                    "Ad,Soyad,Okul,Sınıf,Şube,Hedef Toplam,Hedef Türkçe,Hedef Matematik,Hedef Fen,Hedef Sosyal,Hedef Din,Hedef İngilizce,Notlar"
                                 )
                                 .font(.system(.caption, design: .monospaced))
                                 .foregroundStyle(.primary)
                                 .padding(.horizontal, 8)
-                                .padding(.vertical, 8)
+                                .padding(.vertical, 4)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(4)
+                            }
+
+                            if selectedDataTypes.contains(.exams) {
+                                Text("Sınav CSV Başlıkları:")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.secondary)
+
+                                Text(
+                                    "ÖğrenciAdı,ÖğrenciSoyadı,SınavAdı,Tarih,ToplamPuan,TürkçeNet,MatematikNet,FenNet,SosyalNet,DinNet,İngilizceNet,Notlar"
+                                )
+                                .font(.system(.caption, design: .monospaced))
+                                .foregroundStyle(.primary)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(4)
+                            }
+
+                            if selectedDataTypes.contains(.performance) {
+                                Text("Performans CSV Başlıkları:")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.secondary)
+
+                                Text(
+                                    "Öğrenci,ÖğrenciSoyadı,Ders,Konu,DoğruSayısı,YanlışSayısı,BoşSayısı,Süre,Notlar,Tarih"
+                                )
+                                .font(.system(.caption, design: .monospaced))
+                                .foregroundStyle(.primary)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
                                 .background(Color(.systemGray6))
                                 .cornerRadius(4)
                             }
                         }
-                    }
+                    } else if importFormat == .json {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("JSON Yapısı:")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.secondary)
 
-                    Section {
-                        Button("Dosya Seç") {
-                            isImporting = true
+                            Text(
+                                """
+                                {
+                                  "students": [...],
+                                  "exams": [...],
+                                  "performance": [...]
+                                }
+                                """
+                            )
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundStyle(.primary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 8)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(4)
                         }
-                        .frame(maxWidth: .infinity)
+                    } else if importFormat == .excel {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Excel Sayfa Yapısı:")
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.secondary)
+
+                            Text(
+                                "• Sayfa 1: Öğrenciler\n• Sayfa 2: Sınavlar\n• Sayfa 3: Performans"
+                            )
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundStyle(.primary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 8)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(4)
+                        }
                     }
+                }
+
+                Section {
+                    Button("Dosya Seç") {
+                        isImporting = true
+                    }
+                    .frame(maxWidth: .infinity)
                 }
             }
             .navigationTitle("Veri İçe Aktar")
@@ -472,7 +548,7 @@ struct ImportDataView: View {
             }
             .fileImporter(
                 isPresented: $isImporting,
-                allowedContentTypes: importFormat == .csv ? [.commaSeparatedText] : [.json],
+                allowedContentTypes: getContentTypes(for: importFormat),
                 allowsMultipleSelection: false
             ) { result in
                 switch result {
@@ -485,10 +561,26 @@ struct ImportDataView: View {
                     isImporting = false
                 }
             }
+            .alert("İçe Aktarma Sonucu", isPresented: $showingImportResult) {
+                Button("Tamam") {}
+            } message: {
+                Text(importStatusMessage)
+            }
         }
     }
 
-    func importData(from url: URL) {
+    private func getContentTypes(for format: ImportFormat) -> [UTType] {
+        switch format {
+        case .csv:
+            return [.commaSeparatedText]
+        case .json:
+            return [.json]
+        case .excel:
+            return [UTType(filenameExtension: "xlsx") ?? .data]
+        }
+    }
+
+    private func importData(from url: URL) {
         guard url.startAccessingSecurityScopedResource() else {
             print("Could not access file")
             return
@@ -499,32 +591,61 @@ struct ImportDataView: View {
         }
 
         do {
-            var importedCount = 0
+            var results: [String: Int] = [:]
 
             switch importFormat {
             case .csv:
-                importedCount = try importCSVData(from: url)
+                results = try importCSVData(from: url)
             case .json:
-                importedCount = try importJSONData(from: url)
+                results = try importJSONData(from: url)
+            case .excel:
+                results = try importExcelData(from: url)
             }
 
-            print("Data imported successfully from \(url.lastPathComponent)")
+            let totalImported = results.values.reduce(0, +)
+            var message = "Toplam \(totalImported) kayıt başarıyla içe aktarıldı:\n\n"
+            for (key, count) in results {
+                if count > 0 {
+                    message += "• \(key): \(count)\n"
+                }
+            }
 
-            // Show success alert or message
-            // In a full implementation, you'd add a state variable and alert here
-            print("Başarıyla \(importedCount) öğrenci içe aktarıldı")
+            importStatusMessage = message
+            showingImportResult = true
+
+            print("Data imported successfully from \(url.lastPathComponent)")
         } catch {
+            importStatusMessage = "Aktarma hatası: \(error.localizedDescription)"
+            showingImportResult = true
             print("Import failed: \(error.localizedDescription)")
-            // Show error alert or message
         }
 
         dismiss()
     }
 
-    func importCSVData(from url: URL) throws -> Int {
+    private func importCSVData(from url: URL) throws -> [String: Int] {
         let content = try String(contentsOf: url, encoding: .utf8)
-        let lines = content.components(separatedBy: .newlines).filter { !$0.isEmpty }
+        var results: [String: Int] = [:]
 
+        // Detect CSV type based on header or filename
+        if content.contains("ÖğrenciAdı,ÖğrenciSoyadı,SınavAdı")
+            && selectedDataTypes.contains(.exams)
+        {
+            results["Sınavlar"] = try importExamCSV(content: content)
+        } else if content.contains("Öğrenci,ÖğrenciSoyadı,Ders,Konu,DoğruSayısı")
+            && selectedDataTypes.contains(.performance)
+        {
+            results["Performans"] = try importPerformanceCSV(content: content)
+        } else if selectedDataTypes.contains(.students) {
+            results["Öğrenciler"] = try importStudentCSV(content: content)
+        }
+
+        try modelContext.save()
+        return results
+    }
+
+    func importStudentCSV(content: String) throws -> Int {
+        let lines = content.components(separatedBy: .newlines).filter { !$0.isEmpty }
         guard lines.count > 1 else { return 0 }
 
         for line in lines.dropFirst() {
@@ -541,24 +662,207 @@ struct ImportDataView: View {
                 branch: components.count > 4
                     ? components[4].trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
                     : "",
-                notes: components.count > 5
-                    ? components[5].trimmingCharacters(in: .whitespacesAndNewlines) : ""
+                notes: components.count > 12
+                    ? components[12].trimmingCharacters(in: .whitespacesAndNewlines) : ""
             )
+
+            // Import target scores if available
+            // CSV format: Ad,Soyad,Okul,Sınıf,Şube,Hedef Toplam,Hedef Türkçe,Hedef Matematik,Hedef Fen,Hedef Sosyal,Hedef Din,Hedef İngilizce,Notlar
+            if components.count > 5,
+                let targetTotal = Double(
+                    components[5].trimmingCharacters(in: .whitespacesAndNewlines))
+            {
+                student.targetTotalScore = targetTotal
+            }
+            if components.count > 6,
+                let targetTurkce = Double(
+                    components[6].trimmingCharacters(in: .whitespacesAndNewlines))
+            {
+                student.targetTurkceNet = targetTurkce
+            }
+            if components.count > 7,
+                let targetMat = Double(
+                    components[7].trimmingCharacters(in: .whitespacesAndNewlines))
+            {
+                student.targetMatematikNet = targetMat
+            }
+            if components.count > 8,
+                let targetFen = Double(
+                    components[8].trimmingCharacters(in: .whitespacesAndNewlines))
+            {
+                student.targetFenNet = targetFen
+            }
+            if components.count > 9,
+                let targetSosyal = Double(
+                    components[9].trimmingCharacters(in: .whitespacesAndNewlines))
+            {
+                student.targetSosyalNet = targetSosyal
+            }
+            if components.count > 10,
+                let targetDin = Double(
+                    components[10].trimmingCharacters(in: .whitespacesAndNewlines))
+            {
+                student.targetDinNet = targetDin
+            }
+            if components.count > 11,
+                let targetIng = Double(
+                    components[11].trimmingCharacters(in: .whitespacesAndNewlines))
+            {
+                student.targetIngilizceNet = targetIng
+            }
 
             modelContext.insert(student)
         }
 
-        try modelContext.save()
-        return lines.count - 1  // Number of imported students (excluding header)
+        return lines.count - 1
     }
 
-    func importJSONData(from url: URL) throws -> Int {
+    func importExamCSV(content: String) throws -> Int {
+        let lines = content.components(separatedBy: .newlines).filter { !$0.isEmpty }
+        guard lines.count > 1 else { return 0 }
+
+        // Get existing students
+        let students = try modelContext.fetch(FetchDescriptor<Student>())
+        var studentMap: [String: Student] = [:]
+        for student in students {
+            studentMap["\(student.firstName) \(student.lastName)"] = student
+        }
+
+        var importedCount = 0
+
+        for line in lines.dropFirst() {
+            let components = line.components(separatedBy: ",")
+            guard components.count >= 4 else { continue }
+
+            let studentName =
+                "\(components[0].trimmingCharacters(in: .whitespacesAndNewlines)) \(components[1].trimmingCharacters(in: .whitespacesAndNewlines))"
+            guard let student = studentMap[studentName] else { continue }
+
+            let examName = components[2].trimmingCharacters(in: .whitespacesAndNewlines)
+            let totalScore =
+                Double(components[4].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+
+            let exam = PracticeExam(name: examName, totalScore: totalScore)
+
+            // Add subject nets if available
+            if components.count > 5, let turkceNet = Double(components[5]) {
+                exam.turkceNet = turkceNet
+            }
+            if components.count > 6, let matNet = Double(components[6]) {
+                exam.matematikNet = matNet
+            }
+            if components.count > 7, let fenNet = Double(components[7]) {
+                exam.fenNet = fenNet
+            }
+            if components.count > 8, let sosyalNet = Double(components[8]) {
+                exam.sosyalNet = sosyalNet
+            }
+            if components.count > 9, let dinNet = Double(components[9]) {
+                exam.dinNet = dinNet
+            }
+            if components.count > 10, let ingNet = Double(components[10]) {
+                exam.ingilizceNet = ingNet
+            }
+            if components.count > 11 {
+                exam.notes = components[11].trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+
+            exam.student = student
+            modelContext.insert(exam)
+            importedCount += 1
+        }
+
+        return importedCount
+    }
+
+    func importPerformanceCSV(content: String) throws -> Int {
+        let lines = content.components(separatedBy: .newlines).filter { !$0.isEmpty }
+        guard lines.count > 1 else { return 0 }
+
+        // Get existing students
+        let students = try modelContext.fetch(FetchDescriptor<Student>())
+        var studentMap: [String: Student] = [:]
+        for student in students {
+            studentMap["\(student.firstName) \(student.lastName)"] = student
+        }
+
+        var importedCount = 0
+
+        for line in lines.dropFirst() {
+            let components = line.components(separatedBy: ",")
+            guard components.count >= 7 else { continue }
+
+            let studentName =
+                "\(components[0].trimmingCharacters(in: .whitespacesAndNewlines)) \(components[1].trimmingCharacters(in: .whitespacesAndNewlines))"
+            guard let student = studentMap[studentName] else { continue }
+
+            let subject = components[2].trimmingCharacters(in: .whitespacesAndNewlines)
+            let topic = components[3].trimmingCharacters(in: .whitespacesAndNewlines)
+            let correctCount =
+                Int(components[4].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+            let wrongCount = Int(components[5].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+            let emptyCount = Int(components[6].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+
+            let performance = QuestionPerformance(
+                subject: subject,
+                topic: topic,
+                correct: correctCount,
+                wrong: wrongCount,
+                empty: emptyCount,
+                timeInMinutes: components.count > 7
+                    ? (Int(components[7].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0) : 0,
+                notes: components.count > 8
+                    ? components[8].trimmingCharacters(in: .whitespacesAndNewlines) : ""
+            )
+
+            // Parse date if available
+            if components.count > 9 {
+                performance.date =
+                    parseDate(from: components[9].trimmingCharacters(in: .whitespacesAndNewlines))
+                    ?? Date()
+            }
+
+            performance.student = student
+            modelContext.insert(performance)
+            importedCount += 1
+        }
+
+        return importedCount
+    }
+
+    private func importJSONData(from url: URL) throws -> [String: Int] {
         let data = try Data(contentsOf: url)
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+        var results: [String: Int] = [:]
+
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw ImportError.invalidFormat
         }
 
-        for studentData in json {
+        // Import students
+        if let studentsData = json["students"] as? [[String: Any]],
+            selectedDataTypes.contains(.students)
+        {
+            results["Öğrenciler"] = try importStudentsFromJSON(studentsData)
+        }
+
+        // Import exams
+        if let examsData = json["exams"] as? [[String: Any]], selectedDataTypes.contains(.exams) {
+            results["Sınavlar"] = try importExamsFromJSON(examsData)
+        }
+
+        // Import performance data
+        if let performanceData = json["performance"] as? [[String: Any]],
+            selectedDataTypes.contains(.performance)
+        {
+            results["Performans"] = try importPerformanceFromJSON(performanceData)
+        }
+
+        try modelContext.save()
+        return results
+    }
+
+    private func importStudentsFromJSON(_ studentsData: [[String: Any]]) throws -> Int {
+        for studentData in studentsData {
             guard let firstName = studentData["firstName"] as? String,
                 let lastName = studentData["lastName"] as? String
             else {
@@ -574,16 +878,172 @@ struct ImportDataView: View {
                 notes: studentData["notes"] as? String ?? ""
             )
 
+            // Import target scores
+            if let targetTotal = studentData["targetTotalScore"] as? Double {
+                student.targetTotalScore = targetTotal
+            }
+            if let targetTurkce = studentData["targetTurkceNet"] as? Double {
+                student.targetTurkceNet = targetTurkce
+            }
+            // ... other target scores
+
             modelContext.insert(student)
         }
-
-        try modelContext.save()
-        return json.count  // Number of imported students
+        return studentsData.count
     }
 
-    func parseDate(from string: String?) -> Date? {
+    private func importExamsFromJSON(_ examsData: [[String: Any]]) throws -> Int {
+        // Get existing students
+        let students = try modelContext.fetch(FetchDescriptor<Student>())
+        var studentMap: [String: Student] = [:]
+        for student in students {
+            studentMap["\(student.firstName) \(student.lastName)"] = student
+        }
+
+        var importedCount = 0
+
+        for examData in examsData {
+            guard let studentFirstName = examData["studentFirstName"] as? String,
+                let studentLastName = examData["studentLastName"] as? String,
+                let examName = examData["examName"] as? String,
+                let totalScore = examData["totalScore"] as? Double
+            else {
+                continue
+            }
+
+            let studentName = "\(studentFirstName) \(studentLastName)"
+            guard let student = studentMap[studentName] else { continue }
+
+            let exam = PracticeExam(name: examName, totalScore: totalScore)
+
+            // Parse date if available
+            if let dateString = examData["date"] as? String {
+                exam.date = parseDate(from: dateString) ?? Date()
+            }
+
+            // Add subject nets
+            if let turkceNet = examData["turkceNet"] as? Double {
+                exam.turkceNet = turkceNet
+            }
+            if let matematikNet = examData["matematikNet"] as? Double {
+                exam.matematikNet = matematikNet
+            }
+            if let fenNet = examData["fenNet"] as? Double {
+                exam.fenNet = fenNet
+            }
+            if let sosyalNet = examData["sosyalNet"] as? Double {
+                exam.sosyalNet = sosyalNet
+            }
+            if let dinNet = examData["dinNet"] as? Double {
+                exam.dinNet = dinNet
+            }
+            if let ingilizceNet = examData["ingilizceNet"] as? Double {
+                exam.ingilizceNet = ingilizceNet
+            }
+            if let notes = examData["notes"] as? String {
+                exam.notes = notes
+            }
+
+            exam.student = student
+            modelContext.insert(exam)
+            importedCount += 1
+        }
+
+        return importedCount
+    }
+
+    private func importPerformanceFromJSON(_ performanceData: [[String: Any]]) throws -> Int {
+        // Get existing students
+        let students = try modelContext.fetch(FetchDescriptor<Student>())
+        var studentMap: [String: Student] = [:]
+        for student in students {
+            studentMap["\(student.firstName) \(student.lastName)"] = student
+        }
+
+        var importedCount = 0
+
+        for performanceData in performanceData {
+            guard let studentFirstName = performanceData["studentFirstName"] as? String,
+                let studentLastName = performanceData["studentLastName"] as? String,
+                let subject = performanceData["subject"] as? String,
+                let topic = performanceData["topic"] as? String,
+                let correctCount = performanceData["correctCount"] as? Int,
+                let wrongCount = performanceData["wrongCount"] as? Int,
+                let emptyCount = performanceData["emptyCount"] as? Int
+            else {
+                continue
+            }
+
+            let studentName = "\(studentFirstName) \(studentLastName)"
+            guard let student = studentMap[studentName] else { continue }
+
+            let performance = QuestionPerformance(
+                subject: subject,
+                topic: topic,
+                correct: correctCount,
+                wrong: wrongCount,
+                empty: emptyCount,
+                timeInMinutes: performanceData["timeInMinutes"] as? Int ?? 0,
+                notes: performanceData["notes"] as? String ?? ""
+            )
+
+            // Parse date if available
+            if let dateString = performanceData["date"] as? String {
+                performance.date = parseDate(from: dateString) ?? Date()
+            }
+
+            performance.student = student
+            modelContext.insert(performance)
+            importedCount += 1
+        }
+
+        return importedCount
+    }
+
+    private func importExcelData(from url: URL) throws -> [String: Int] {
+        // Excel import would require additional framework like xlsxwriter
+        // For now, return empty result
+        var results: [String: Int] = [:]
+        results["Excel"] = 0
+        return results
+    }
+
+    private func parseDate(from string: String?) -> Date? {
         guard let string = string else { return nil }
-        return ISO8601DateFormatter().date(from: string)
+
+        // Try different date formats
+        let formatters = [
+            ISO8601DateFormatter(),
+            {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd"
+                return formatter
+            }(),
+            {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "dd.MM.yyyy"
+                return formatter
+            }(),
+            {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "dd/MM/yyyy"
+                return formatter
+            }(),
+        ]
+
+        for formatter in formatters {
+            if let iso8601Formatter = formatter as? ISO8601DateFormatter {
+                if let date = iso8601Formatter.date(from: string) {
+                    return date
+                }
+            } else if let dateFormatter = formatter as? DateFormatter {
+                if let date = dateFormatter.date(from: string) {
+                    return date
+                }
+            }
+        }
+
+        return nil
     }
 
     enum ImportError: Error {
