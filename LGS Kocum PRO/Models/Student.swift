@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import UIKit
 
 @Model
 final class Student: Identifiable, ObservableObject {
@@ -11,6 +12,7 @@ final class Student: Identifiable, ObservableObject {
     var branch: String = ""  // Şube bilgisi (A, B, C, etc.)
     var notes: String
     var createdAt: Date
+    var profileImageData: Data? = nil  // Profile photo storage
 
     // Goal tracking fields
     var targetTotalScore: Double = 400  // Default LGS target
@@ -46,6 +48,17 @@ final class Student: Identifiable, ObservableObject {
         let first = firstName.isEmpty ? "Ad" : firstName
         let last = lastName.isEmpty ? "Soyad" : lastName
         return "\(first) \(last)"
+    }
+
+    // Profile image computed property
+    var profileImage: UIImage? {
+        get {
+            guard let data = profileImageData else { return nil }
+            return UIImage(data: data)
+        }
+        set {
+            profileImageData = newValue?.jpegData(compressionQuality: 0.7)
+        }
     }
 
     // Goal tracking computed properties

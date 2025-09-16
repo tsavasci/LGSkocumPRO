@@ -372,14 +372,7 @@ struct StudentStatusCard: View {
         NavigationLink(destination: StudentDetailView(student: student)) {
             HStack(spacing: 12) {
                 // Student Avatar
-                Circle()
-                    .fill(Color(.systemGray5))
-                    .frame(width: 50, height: 50)
-                    .overlay(
-                        Text(student.firstName.prefix(1).uppercased())
-                            .font(.headline.bold())
-                            .foregroundStyle(.primary)
-                    )
+                StudentProfileImageView(student: student, size: 50)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(student.fullName)

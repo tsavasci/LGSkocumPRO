@@ -6,12 +6,7 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		F29A12BD2E79A9B300131E8C /* Documentation 2.docc in Sources */ = {isa = PBXBuildFile; fileRef = F29A12BC2E79A9B300131E8C /* Documentation 2.docc */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
-		F29A12BC2E79A9B300131E8C /* Documentation 2.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = "Documentation 2.docc"; sourceTree = "<group>"; };
 		F2B40AC42E7334E7009FC394 /* LGS Kocum PRO.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LGS Kocum PRO.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -37,7 +32,6 @@
 		F2B40ABB2E7334E7009FC394 = {
 			isa = PBXGroup;
 			children = (
-				F29A12BC2E79A9B300131E8C /* Documentation 2.docc */,
 				F2B40AC62E7334E7009FC394 /* LGS Kocum PRO */,
 				F2B40AC52E7334E7009FC394 /* Products */,
 			);
@@ -125,7 +119,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F29A12BD2E79A9B300131E8C /* Documentation 2.docc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

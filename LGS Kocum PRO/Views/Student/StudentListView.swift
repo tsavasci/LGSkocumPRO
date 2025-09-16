@@ -274,15 +274,7 @@ struct StudentCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 // Student Avatar
-                Circle()
-                    .fill(Color(.systemBlue))
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        Text(student.firstName.prefix(1).uppercased())
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.white)
-                    )
+                StudentProfileImageView(student: student, size: 40)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(student.fullName)

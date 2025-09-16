@@ -5,6 +5,7 @@ import SwiftUI
 struct StudentDetailView: View {
     let student: Student
     @State private var selectedTab: Tab = .overview
+    @State private var showingEditSheet = false
 
     enum Tab {
         case overview, practiceExams, questions, notes
@@ -14,10 +15,17 @@ struct StudentDetailView: View {
         VStack(spacing: 0) {
             // Student Info Header
             VStack(spacing: 8) {
-                Image(systemName: "person.circle.fill")
-                    .resizable()
-                    .frame(width: 80, height: 80)
-                    .foregroundStyle(.blue)
+                HStack {
+                    Spacer()
+                    Button("Düzenle") {
+                        showingEditSheet = true
+                    }
+                    .font(.caption)
+                    .foregroundColor(.blue)
+                }
+                .padding(.horizontal)
+
+                StudentProfileImageView(student: student, size: 80, showBorder: true)
 
                 Text(student.fullName)
                     .font(.title2.bold())
@@ -68,6 +76,9 @@ struct StudentDetailView: View {
         }
         .navigationTitle(student.fullName)
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showingEditSheet) {
+            EditStudentView(student: student)
+        }
     }
 }
 

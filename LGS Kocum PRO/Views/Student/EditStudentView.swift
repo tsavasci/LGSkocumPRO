@@ -2,17 +2,30 @@ import SwiftData
 import SwiftUI
 import UIKit
 
-struct AddStudentView: View {
+struct EditStudentView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
-    @State private var firstName = ""
-    @State private var lastName = ""
-    @State private var school = ""
-    @State private var grade = 8
-    @State private var branch = ""
-    @State private var notes = ""
+    let student: Student
+
+    @State private var firstName: String
+    @State private var lastName: String
+    @State private var school: String
+    @State private var grade: Int
+    @State private var branch: String
+    @State private var notes: String
     @State private var selectedImage: UIImage?
+
+    init(student: Student) {
+        self.student = student
+        _firstName = State(initialValue: student.firstName)
+        _lastName = State(initialValue: student.lastName)
+        _school = State(initialValue: student.school)
+        _grade = State(initialValue: student.grade)
+        _branch = State(initialValue: student.branch)
+        _notes = State(initialValue: student.notes)
+        _selectedImage = State(initialValue: student.profileImage)
+    }
 
     var body: some View {
         NavigationStack {
@@ -25,7 +38,7 @@ struct AddStudentView: View {
                             Text("Profil Fotoğrafı")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                            Text("Öğrencinin fotoğrafını ekleyin")
+                            Text("Öğrencinin fotoğrafını değiştirin")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -67,7 +80,7 @@ struct AddStudentView: View {
                         .frame(minHeight: 100)
                 }
             }
-            .navigationTitle("Yeni Öğrenci")
+            .navigationTitle("Öğrenci Düzenle")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -78,7 +91,7 @@ struct AddStudentView: View {
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Kaydet") {
-                        addStudent()
+                        updateStudent()
                         dismiss()
                     }
                     .disabled(firstName.isEmpty || lastName.isEmpty)
@@ -87,26 +100,40 @@ struct AddStudentView: View {
         }
     }
 
-    private func addStudent() {
-        let student = Student(
-            firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
-            lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines),
-            school: school.trimmingCharacters(in: .whitespacesAndNewlines),
-            grade: grade,
-            branch: branch.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(),
-            notes: notes.trimmingCharacters(in: .whitespacesAndNewlines)
-        )
+    private func updateStudent() {
+        student.firstName = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+        student.lastName = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+        student.school = school.trimmingCharacters(in: .whitespacesAndNewlines)
+        student.grade = grade
+        student.branch = branch.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        student.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        // Set profile image if selected
-        if let selectedImage = selectedImage {
-            student.profileImage = selectedImage
+        // Update profile image
+        student.profileImage = selectedImage
+
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to update student: \(error.localizedDescription)")
         }
-
-        modelContext.insert(student)
     }
 }
 
 #Preview {
-    AddStudentView()
-        .modelContainer(for: Student.self, inMemory: true)
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: Student.self, configurations: config)
+
+    let student = Student(
+        firstName: "Ahmet",
+        lastName: "Yılmaz",
+        school: "Örnek Ortaokulu",
+        grade: 8,
+        branch: "A",
+        notes: "Örnek not"
+    )
+
+    return NavigationStack {
+        EditStudentView(student: student)
+    }
+    .modelContainer(container)
 }
