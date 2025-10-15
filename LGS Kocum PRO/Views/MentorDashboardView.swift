@@ -23,78 +23,95 @@ struct MentorDashboardView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Quick Stats Header
-                    VStack(spacing: 16) {
-                        HStack {
-                            Text("Mentor Dashboard")
-                                .font(.title.bold())
-                                .frame(maxWidth: .infinity, alignment: .leading)
+            ZStack {
+                // Modern Gradient Background
+                LinearGradient(
+                    colors: [
+                        Color(hex: "667eea").opacity(0.05),
+                        Color(hex: "764ba2").opacity(0.05),
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
 
-                            Picker("Zaman", selection: $selectedTimeRange) {
-                                ForEach(TimeRange.allCases) { range in
-                                    Text(range.rawValue).tag(range)
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Quick Stats Header
+                        VStack(spacing: 16) {
+                            HStack {
+                                Text("Mentor Dashboard")
+                                    .font(.title.bold())
+                                    .foregroundStyle(Color.primaryGradient)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                                Picker("Zaman", selection: $selectedTimeRange) {
+                                    ForEach(TimeRange.allCases) { range in
+                                        Text(range.rawValue).tag(range)
+                                    }
                                 }
+                                .pickerStyle(.segmented)
+                                .frame(width: 200)
                             }
-                            .pickerStyle(.segmented)
-                            .frame(width: 200)
-                        }
-                        .padding(.horizontal)
-
-                        // Quick Stats Cards
-                        HStack(spacing: 12) {
-                            DashboardCard(
-                                title: "Toplam Öğrenci",
-                                value: "\(students.count)",
-                                icon: "person.3.fill",
-                                color: .blue
-                            )
-
-                            DashboardCard(
-                                title: "Aktif Öğrenci",
-                                value: "\(activeStudentsCount)",
-                                icon: "figure.walk",
-                                color: .green
-                            )
-
-                            DashboardCard(
-                                title: "Uyarı",
-                                value: "\(warningStudentsCount)",
-                                icon: "exclamationmark.triangle.fill",
-                                color: .orange
-                            )
-                        }
-                        .padding(.horizontal)
-                    }
-
-                    // Student Activity Overview
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Öğrenci Durumu")
-                            .font(.headline)
                             .padding(.horizontal)
 
-                        LazyVStack(spacing: 8) {
-                            ForEach(students) { student in
-                                StudentStatusCard(
-                                    student: student,
-                                    timeRange: selectedTimeRange,
-                                    onSetGoals: {
-                                        selectedStudentForGoals = student
-                                        showingGoalsSheet = true
-                                    }
+                            // Quick Stats Cards
+                            HStack(spacing: 12) {
+                                DashboardCard(
+                                    title: "Toplam Öğrenci",
+                                    value: "\(students.count)",
+                                    icon: "person.3.fill",
+                                    color: .blue
+                                )
+
+                                DashboardCard(
+                                    title: "Aktif Öğrenci",
+                                    value: "\(activeStudentsCount)",
+                                    icon: "figure.walk",
+                                    color: .green
+                                )
+
+                                DashboardCard(
+                                    title: "Uyarı",
+                                    value: "\(warningStudentsCount)",
+                                    icon: "exclamationmark.triangle.fill",
+                                    color: .orange
                                 )
                             }
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
-                    }
 
-                    // Performance Summary Chart
-                    if !students.isEmpty {
+                        // Student Activity Overview
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Genel Performans Trendi")
-                                .font(.headline)
+                            Text("Öğrenci Durumu")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.primaryGradient)
                                 .padding(.horizontal)
+
+                            LazyVStack(spacing: 12) {
+                                ForEach(students) { student in
+                                    StudentStatusCard(
+                                        student: student,
+                                        timeRange: selectedTimeRange,
+                                        onSetGoals: {
+                                            selectedStudentForGoals = student
+                                            showingGoalsSheet = true
+                                        }
+                                    )
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+
+                        // Performance Summary Chart
+                        if !students.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Genel Performans Trendi")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(Color.primaryGradient)
+                                    .padding(.horizontal)
 
                             Chart {
                                 ForEach(recentPerformanceData, id: \.date) { data in
@@ -109,16 +126,19 @@ struct MentorDashboardView: View {
                             .frame(height: 200)
                             .padding()
                             .background(Color(.systemBackground))
-                            .cornerRadius(12)
+                            .cornerRadius(16)
+                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                             .padding(.horizontal)
                         }
                     }
 
-                    // Quick Actions
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Hızlı İşlemler")
-                            .font(.headline)
-                            .padding(.horizontal)
+                        // Quick Actions
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Hızlı İşlemler")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.primaryGradient)
+                                .padding(.horizontal)
 
                         LazyVGrid(
                             columns: [
@@ -295,13 +315,19 @@ struct DashboardCard: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             Image(systemName: icon)
-                .font(.title2)
-                .foregroundStyle(color)
+                .font(.system(size: 32))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [color, color.opacity(0.7)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
 
             Text(value)
-                .font(.title2.bold())
+                .font(.title.bold())
                 .foregroundStyle(.primary)
 
             Text(title)
@@ -312,8 +338,8 @@ struct DashboardCard: View {
         .frame(maxWidth: .infinity)
         .padding()
         .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
     }
 }
 
@@ -370,13 +396,20 @@ struct StudentStatusCard: View {
 
     var body: some View {
         NavigationLink(destination: StudentDetailView(student: student)) {
-            HStack(spacing: 12) {
-                // Student Avatar
-                StudentProfileImageView(student: student, size: 50)
+            HStack(spacing: 16) {
+                // Student Avatar with gradient border
+                ZStack {
+                    Circle()
+                        .fill(Color.primaryGradient)
+                        .frame(width: 56, height: 56)
 
-                VStack(alignment: .leading, spacing: 4) {
+                    StudentProfileImageView(student: student, size: 50)
+                        .clipShape(Circle())
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
                     Text(student.fullName)
-                        .font(.subheadline.bold())
+                        .font(.headline)
                         .foregroundStyle(.primary)
 
                     if !student.branch.isEmpty {
@@ -389,53 +422,72 @@ struct StudentStatusCard: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    Text("Son aktivite: \(lastActivity)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                            .font(.caption2)
+                        Text("Son aktivite: \(lastActivity)")
+                            .font(.caption)
+                    }
+                    .foregroundStyle(.secondary)
                 }
 
                 Spacer()
 
-                VStack(alignment: .trailing, spacing: 4) {
-                    HStack(spacing: 4) {
+                VStack(alignment: .trailing, spacing: 8) {
+                    HStack(spacing: 6) {
                         Image(systemName: activityStatus.icon)
-                            .foregroundStyle(activityStatus.color)
+                            .font(.caption)
                         Text(activityStatus.status)
                             .font(.caption.bold())
-                            .foregroundStyle(activityStatus.color)
                     }
+                    .foregroundStyle(activityStatus.color)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(activityStatus.color.opacity(0.1))
+                    .cornerRadius(8)
 
-                    VStack(alignment: .trailing, spacing: 2) {
+                    VStack(alignment: .trailing, spacing: 4) {
                         if let avgScore = averageScore {
-                            Text("\(Int(avgScore)) puan ort.")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            HStack(spacing: 4) {
+                                Image(systemName: "chart.bar.fill")
+                                    .font(.caption2)
+                                Text("\(Int(avgScore)) puan")
+                                    .font(.caption)
+                            }
+                            .foregroundStyle(.secondary)
                         }
 
                         if student.targetTotalScore > 0 {
-                            Text("Hedef: \(Int(student.targetTotalScore))")
-                                .font(.caption2)
-                                .foregroundStyle(.blue)
+                            HStack(spacing: 4) {
+                                Image(systemName: "target")
+                                    .font(.caption2)
+                                Text("Hedef: \(Int(student.targetTotalScore))")
+                                    .font(.caption2)
+                            }
+                            .foregroundStyle(.blue)
                         }
                     }
 
                     Button(action: onSetGoals) {
-                        Image(systemName: "target")
-                            .font(.caption)
-                            .foregroundStyle(.blue)
-                            .padding(4)
-                            .background(Color.blue.opacity(0.1))
-                            .cornerRadius(4)
+                        HStack(spacing: 4) {
+                            Image(systemName: "target")
+                            Text("Hedef")
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.primaryGradient)
+                        .cornerRadius(8)
                     }
-                    .buttonStyle(.plain)
                 }
             }
-            .padding()
+            .padding(16)
+            .background(Color(.systemBackground))
+            .cornerRadius(16)
+            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
         }
         .buttonStyle(.plain)
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
     }
 
     private var averageScore: Double? {
@@ -453,22 +505,35 @@ struct QuickActionButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.title2)
-                    .foregroundStyle(.white)
+            VStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [color.opacity(0.2), color.opacity(0.1)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 50, height: 50)
+
+                    Image(systemName: icon)
+                        .font(.title2)
+                        .foregroundStyle(color)
+                }
 
                 Text(title)
-                    .font(.caption.bold())
-                    .foregroundStyle(.white)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 80)
-            .background(color.gradient)
-            .cornerRadius(12)
+            .frame(height: 120)
+            .background(Color(.systemBackground))
+            .cornerRadius(16)
+            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
         }
-        .buttonStyle(.plain)
     }
 }
 

@@ -1,3 +1,4 @@
+import AVFoundation
 import PhotosUI
 import SwiftUI
 import UIKit
@@ -10,6 +11,28 @@ struct ImagePicker: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.sourceType = sourceType
+        
+        if sourceType == .camera {
+            // Sadece fotoğraf çekme modunu ayarla
+            picker.cameraCaptureMode = .photo
+            
+            // Kullanılabilir kamera aygıtlarını kontrol et
+            let cameraTypes: [UIImagePickerController.CameraDevice] = [.rear, .front]
+            
+            // Kullanılabilir ilk kamerayı seç
+            if let availableCamera = cameraTypes.first(where: { UIImagePickerController.isCameraDeviceAvailable($0) }) {
+                picker.cameraDevice = availableCamera
+            }
+            
+            // Varsayılan kamera ayarlarını sıfırla
+            picker.showsCameraControls = true
+            picker.cameraFlashMode = .auto
+            
+            // Gereksiz özellikleri devre dışı bırak
+            picker.videoQuality = .typeHigh
+            picker.videoExportPreset = AVAssetExportPresetPassthrough
+        }
+        
         picker.delegate = context.coordinator
         picker.allowsEditing = true
         return picker
@@ -54,6 +77,10 @@ struct PhotoPickerView: View {
     @State private var showingActionSheet = false
     @State private var imageSourceType: UIImagePickerController.SourceType = .camera
     @State private var selectedPhotoPickerItem: PhotosPickerItem?
+    @State private var showCameraUnavailableAlert = false
+    @State private var showPhotoLibraryUnavailableAlert = false
+    @State private var cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
+    @State private var photoLibraryAuthorizationStatus = PHPhotoLibrary.authorizationStatus(for: .readWrite)
 
     var body: some View {
         Button(action: {
@@ -103,15 +130,16 @@ struct PhotoPickerView: View {
         .confirmationDialog(
             "Fotoğraf Seç", isPresented: $showingActionSheet, titleVisibility: .visible
         ) {
+            // Kamera butonu
             if UIImagePickerController.isSourceTypeAvailable(.camera) {
                 Button("Fotoğraf Çek") {
-                    imageSourceType = .camera
-                    showingImagePicker = true
+                    checkCameraAccess()
                 }
             }
 
+            // Galeri butonu
             Button("Galeriden Seç") {
-                showingPhotosPicker = true
+                checkPhotoLibraryAccess()
             }
 
             if selectedImage != nil {
@@ -140,6 +168,94 @@ struct PhotoPickerView: View {
                         await MainActor.run {
                             selectedImage = image
                         }
+                    }
+                }
+            }
+        }
+        .alert("Kamera Erişimi Reddedildi", isPresented: $showCameraUnavailableAlert) {
+            Button("Ayarlar") {
+                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(settingsUrl)
+                }
+            }
+            Button("Tamam", role: .cancel) {}
+        } message: {
+            Text("Kamera erişimine izin vermek için ayarlara gidin. Uygulama ayarları > Kamera > İzin Ver")
+        }
+        .alert("Fotoğraf Kütüphanesi Erişimi Reddedildi", isPresented: $showPhotoLibraryUnavailableAlert) {
+            Button("Ayarlar") {
+                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(settingsUrl)
+                }
+            }
+            Button("Tamam", role: .cancel) {}
+        } message: {
+            Text("Fotoğraf kütüphanesine erişim izni vermek için ayarlara gidin. Uygulama ayarları > Fotoğraflar > Tüm Fotoğraflara Erişim")
+        }
+    }
+    
+    private func checkCameraAccess() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            // İzin verilmişse kamerayı aç
+            if UIImagePickerController.isCameraDeviceAvailable(.rear) || UIImagePickerController.isCameraDeviceAvailable(.front) {
+                imageSourceType = .camera
+                showingImagePicker = true
+            } else {
+                showCameraUnavailableAlert = true
+            }
+            
+        case .notDetermined:
+            // İzin istenmemişse iste
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        if UIImagePickerController.isCameraDeviceAvailable(.rear) || UIImagePickerController.isCameraDeviceAvailable(.front) {
+                            self.imageSourceType = .camera
+                            self.showingImagePicker = true
+                        } else {
+                            self.showCameraUnavailableAlert = true
+                        }
+                    } else {
+                        self.showCameraUnavailableAlert = true
+                    }
+                }
+            }
+            
+        case .denied, .restricted:
+            // İzin reddedilmiş veya kısıtlanmışsa ayarlara yönlendir
+            showCameraUnavailableAlert = true
+            
+        @unknown default:
+            showCameraUnavailableAlert = true
+        }
+    }
+    
+    private func checkPhotoLibraryAccess() {
+        if #available(iOS 14, *) {
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+                DispatchQueue.main.async {
+                    switch status {
+                    case .authorized, .limited:
+                        self.showingPhotosPicker = true
+                    case .denied, .restricted:
+                        self.showPhotoLibraryUnavailableAlert = true
+                    case .notDetermined:
+                        // Bu durumda requestAuthorization zaten çağrıldığı için buraya düşmemeli
+                        break
+                    @unknown default:
+                        self.showPhotoLibraryUnavailableAlert = true
+                    }
+                }
+            }
+        } else {
+            // iOS 14 öncesi için eski yöntem
+            PHPhotoLibrary.requestAuthorization { status in
+                DispatchQueue.main.async {
+                    if status == .authorized {
+                        self.showingPhotosPicker = true
+                    } else {
+                        self.showPhotoLibraryUnavailableAlert = true
                     }
                 }
             }

@@ -30,16 +30,29 @@ public struct AnalyticsView: View {
                 )
                 .navigationTitle("Analizler")
             } else {
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Time Range Picker
-                        Picker("Zaman Aralığı", selection: $selectedTimeRange) {
-                            ForEach(TimeRange.allCases) { range in
-                                Text(range.rawValue).tag(range)
+                ZStack {
+                    // Modern Gradient Background
+                    LinearGradient(
+                        colors: [
+                            Color(hex: "667eea").opacity(0.05),
+                            Color(hex: "764ba2").opacity(0.05),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .ignoresSafeArea()
+
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            // Time Range Picker
+                            Picker("Zaman Aralığı", selection: $selectedTimeRange) {
+                                ForEach(TimeRange.allCases) { range in
+                                    Text(range.rawValue).tag(range)
+                                }
                             }
-                        }
-                        .pickerStyle(.segmented)
-                        .padding(.horizontal)
+                            .pickerStyle(.segmented)
+                            .padding(.horizontal)
+                            .padding(.top, 8)
 
                         // Student Picker
                         if students.count > 1 {
@@ -56,7 +69,9 @@ public struct AnalyticsView: View {
                         // Overall Stats
                         VStack(spacing: 16) {
                             Text("Genel İstatistikler")
-                                .font(.headline)
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.primaryGradient)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.horizontal)
 
@@ -97,9 +112,11 @@ public struct AnalyticsView: View {
                         }
 
                         // Performance Chart
-                        VStack(spacing: 8) {
+                        VStack(spacing: 12) {
                             Text("Başarı Grafiği")
-                                .font(.headline)
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.primaryGradient)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.horizontal)
 
@@ -127,47 +144,67 @@ public struct AnalyticsView: View {
                                     AxisTick()
                                 }
                             }
-                            .frame(height: 250)
+                            .frame(height: 200)
                             .padding()
                             .background(Color(.systemBackground))
-                            .cornerRadius(12)
+                            .cornerRadius(16)
+                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                             .padding(.horizontal)
                         }
 
                         // Subject Performance
                         if !subjectPerformance.isEmpty {
-                            VStack(spacing: 8) {
+                            VStack(spacing: 12) {
                                 Text("Ders Bazlı Performans")
-                                    .font(.headline)
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(Color.primaryGradient)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(.horizontal)
 
-                                VStack(spacing: 12) {
+                                VStack(spacing: 16) {
                                     ForEach(subjectPerformance, id: \.subject) { data in
-                                        VStack(alignment: .leading, spacing: 4) {
+                                        VStack(alignment: .leading, spacing: 8) {
                                             HStack {
-                                                Text(data.subject)
-                                                    .font(.subheadline)
+                                                HStack(spacing: 6) {
+                                                    Image(systemName: "book.fill")
+                                                        .font(.caption)
+                                                        .foregroundStyle(scoreColor(data.averageScore))
+                                                    Text(data.subject)
+                                                        .font(.headline)
+                                                }
 
                                                 Spacer()
 
-                                                Text("\(Int(data.averageScore)) puan")
-                                                    .font(.subheadline.bold())
+                                                Text("\(Int(data.averageScore))%")
+                                                    .font(.title3.bold())
                                                     .foregroundStyle(scoreColor(data.averageScore))
                                             }
 
-                                            ProgressView(value: data.averageScore / 100)
-                                                .progressViewStyle(
-                                                    LinearProgressViewStyle(
-                                                        tint: scoreColor(data.averageScore))
-                                                )
-                                                .scaleEffect(x: 1, y: 1.5, anchor: .center)
+                                            GeometryReader { geometry in
+                                                ZStack(alignment: .leading) {
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .fill(Color.gray.opacity(0.2))
+
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .fill(
+                                                            LinearGradient(
+                                                                colors: [scoreColor(data.averageScore), scoreColor(data.averageScore).opacity(0.7)],
+                                                                startPoint: .leading,
+                                                                endPoint: .trailing
+                                                            )
+                                                        )
+                                                        .frame(width: geometry.size.width * (data.averageScore / 100))
+                                                }
+                                            }
+                                            .frame(height: 10)
                                         }
+                                        .padding()
+                                        .background(Color(.systemBackground))
+                                        .cornerRadius(12)
+                                        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
                                     }
                                 }
-                                .padding()
-                                .background(Color(.systemBackground))
-                                .cornerRadius(12)
                                 .padding(.horizontal)
                             }
                         }
@@ -268,6 +305,43 @@ struct SubjectPerformance: Identifiable {
     let id = UUID()
     let subject: String
     let averageScore: Double
+}
+
+// MARK: - StatCard Component
+
+struct StatCard: View {
+    let value: String
+    let label: String
+    let icon: String
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 32))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [color, color.opacity(0.7)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+
+            Text(value)
+                .font(.title2.bold())
+                .foregroundStyle(.primary)
+
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+    }
 }
 
 struct AnalyticsView_Previews: PreviewProvider {

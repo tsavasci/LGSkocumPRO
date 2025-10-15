@@ -27,79 +27,111 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                // Appearance Section
-                Section(header: Text("Görünüm")) {
-                    Picker("Tema", selection: $appearance) {
-                        ForEach(Appearance.allCases) { appearance in
-                            Text(appearance.rawValue).tag(appearance)
+            ZStack {
+                // Modern Gradient Background
+                LinearGradient(
+                    colors: [
+                        Color(hex: "667eea").opacity(0.05),
+                        Color(hex: "764ba2").opacity(0.05),
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+
+                Form {
+                    // Appearance Section
+                    Section(
+                        header: Text("Görünüm")
+                            .font(.headline)
+                            .foregroundStyle(Color.primaryGradient)
+                    ) {
+                        Picker("Tema", selection: $appearance) {
+                            ForEach(Appearance.allCases) { appearance in
+                                Text(appearance.rawValue).tag(appearance)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
+                        .padding(.vertical, 8)
+                    }
+
+                    // Data Management Section
+                    Section(
+                        header: Text("Veri Yönetimi")
+                            .font(.headline)
+                            .foregroundStyle(Color.primaryGradient)
+                    ) {
+                        Button("Verileri Dışa Aktar") {
+                            showingExportOptions = true
+                        }
+
+                        Button("Verileri İçe Aktar") {
+                            showingImportOptions = true
+                        }
+
+                        Button("Verileri Sıfırla", role: .destructive) {
+                            showingResetConfirmation = true
                         }
                     }
-                    .pickerStyle(.segmented)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
-                    .padding(.vertical, 8)
-                }
 
-                // Data Management Section
-                Section(header: Text("Veri Yönetimi")) {
-                    Button("Verileri Dışa Aktar") {
-                        showingExportOptions = true
-                    }
-
-                    Button("Verileri İçe Aktar") {
-                        showingImportOptions = true
-                    }
-
-                    Button("Verileri Sıfırla", role: .destructive) {
-                        showingResetConfirmation = true
-                    }
-                }
-
-                // App Info Section
-                Section(header: Text("Uygulama Hakkında")) {
-                    HStack {
-                        Text("Versiyon")
-                        Spacer()
-                        Text(
-                            Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-                                ?? "1.0.0"
-                        )
-                        .foregroundStyle(.secondary)
-                    }
-
-                    Link(
-                        "Gizlilik Politikası",
-                        destination: URL(string: "https://example.com/privacy")!)
-                    Link(
-                        "Kullanım Koşulları", destination: URL(string: "https://example.com/terms")!
-                    )
-
-                    HStack {
-                        Spacer()
-                        VStack(spacing: 8) {
-                            Image(systemName: "graduationcap.fill")
-                                .font(.system(size: 40))
-                                .foregroundStyle(.blue)
-
-                            Text("LGS Koçum PRO")
-                                .font(.title2.bold())
-
+                    // App Info Section
+                    Section(
+                        header: Text("Uygulama Hakkında")
+                            .font(.headline)
+                            .foregroundStyle(Color.primaryGradient)
+                    ) {
+                        HStack {
+                            Text("Versiyon")
+                            Spacer()
                             Text(
-                                "v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")"
+                                Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+                                    ?? "1.0.0"
                             )
-                            .font(.caption)
                             .foregroundStyle(.secondary)
-
-                            Text("© 2025 Tüm Hakları Saklıdır")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
-                                .padding(.top, 8)
                         }
-                        .padding(.vertical, 20)
-                        Spacer()
+
+                        Link(
+                            "Gizlilik Politikası",
+                            destination: URL(string: "https://example.com/privacy")!)
+                        Link(
+                            "Kullanım Koşulları",
+                            destination: URL(string: "https://example.com/terms")!
+                        )
+
+                        HStack {
+                            Spacer()
+                            VStack(spacing: 8) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.primaryGradient)
+                                        .frame(width: 80, height: 80)
+
+                                    Image(systemName: "graduationcap.fill")
+                                        .font(.system(size: 40))
+                                        .foregroundStyle(.white)
+                                }
+
+                                Text("LGS Koçum PRO")
+                                    .font(.title2.bold())
+                                    .foregroundStyle(Color.primaryGradient)
+
+                                Text(
+                                    "v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")"
+                                )
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+
+                                Text("© 2025 Tüm Hakları Saklıdır")
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                                    .padding(.top, 8)
+                            }
+                            .padding(.vertical, 20)
+                            Spacer()
+                        }
                     }
-                    .listRowBackground(Color.clear)
                 }
             }
             .navigationTitle("Ayarlar")
