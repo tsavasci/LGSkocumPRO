@@ -22,13 +22,46 @@ struct MentorDashboardView: View {
     }
 
     var body: some View {
+        let activeStudentsCount = students.filter { student in
+            hasRecentActivity(student: student, timeRange: selectedTimeRange)
+        }.count
+
+        let warningStudentsCount = students.filter { student in
+            needsAttention(student: student)
+        }.count
+
+        let recentPerformanceData: [PerformanceDataPoint] = {
+            let calendar = Calendar.current
+            let now = Date()
+            var data: [PerformanceDataPoint] = []
+
+            for i in 0..<7 {
+                guard let date = calendar.date(byAdding: .day, value: -i, to: now) else { continue }
+                let dayExams = students.flatMap { $0.practiceExams }
+                    .filter { calendar.isDate($0.date, inSameDayAs: date) }
+
+                let average: Double
+                if dayExams.isEmpty {
+                    average = 0
+                } else {
+                    let total = dayExams.map { $0.totalScore }.reduce(0, +)
+                    let count = Double(dayExams.count)
+                    average = count > 0 ? total / count : 0
+                }
+
+                let safeAverage = average.isFinite ? average : 0
+                data.append(PerformanceDataPoint(date: date, averageScore: safeAverage))
+            }
+
+            return data.reversed()
+        }()
+
         NavigationStack {
             ZStack {
-                // Modern Gradient Background
                 LinearGradient(
                     colors: [
                         Color(hex: "667eea").opacity(0.05),
-                        Color(hex: "764ba2").opacity(0.05),
+                        Color(hex: "764ba2").opacity(0.05)
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -84,8 +117,7 @@ struct MentorDashboardView: View {
                         // Student Activity Overview
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Öğrenci Durumu")
-                                .font(.title2)
-                                .fontWeight(.bold)
+                                .font(.title2.bold())
                                 .foregroundStyle(Color.primaryGradient)
                                 .padding(.horizontal)
 
@@ -108,67 +140,66 @@ struct MentorDashboardView: View {
                         if !students.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Genel Performans Trendi")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
+                                    .font(.title2.bold())
                                     .foregroundStyle(Color.primaryGradient)
                                     .padding(.horizontal)
 
-                            Chart {
-                                ForEach(recentPerformanceData, id: \.date) { data in
-                                    LineMark(
-                                        x: .value("Tarih", data.date),
-                                        y: .value("Ortalama", data.averageScore)
-                                    )
-                                    .foregroundStyle(.blue)
-                                    .symbol(Circle().strokeBorder(lineWidth: 2))
+                                Chart {
+                                    ForEach(recentPerformanceData, id: \.date) { data in
+                                        LineMark(
+                                            x: .value("Tarih", data.date),
+                                            y: .value("Ortalama", data.averageScore)
+                                        )
+                                        .foregroundStyle(.blue)
+                                        .symbol(Circle().strokeBorder(lineWidth: 2))
+                                    }
                                 }
+                                .frame(height: 200)
+                                .padding()
+                                .background(Color(.systemBackground))
+                                .cornerRadius(16)
+                                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                                .padding(.horizontal)
                             }
-                            .frame(height: 200)
-                            .padding()
-                            .background(Color(.systemBackground))
-                            .cornerRadius(16)
-                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-                            .padding(.horizontal)
                         }
-                    }
 
                         // Quick Actions
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Hızlı İşlemler")
-                                .font(.title2)
-                                .fontWeight(.bold)
+                                .font(.title2.bold())
                                 .foregroundStyle(Color.primaryGradient)
                                 .padding(.horizontal)
 
-                        LazyVGrid(
-                            columns: [
-                                GridItem(.flexible()),
-                                GridItem(.flexible()),
-                            ], spacing: 12
-                        ) {
-                            QuickActionButton(
-                                title: "Yeni Öğrenci",
-                                icon: "person.badge.plus",
-                                color: .blue
+                            LazyVGrid(
+                                columns: [
+                                    GridItem(.flexible()),
+                                    GridItem(.flexible())
+                                ],
+                                spacing: 12
                             ) {
-                                showingAddStudent = true
-                            }
+                                QuickActionButton(
+                                    title: "Yeni Öğrenci",
+                                    icon: "person.badge.plus",
+                                    color: .blue
+                                ) {
+                                    showingAddStudent = true
+                                }
 
-                            QuickActionButton(
-                                title: "Rapor Oluştur",
-                                icon: "doc.text.fill",
-                                color: .purple
-                            ) {
-                                showingReportOptions = true
+                                QuickActionButton(
+                                    title: "Rapor Oluştur",
+                                    icon: "doc.text.fill",
+                                    color: .purple
+                                ) {
+                                    showingReportOptions = true
+                                }
                             }
-
+                            .padding(.horizontal)
                         }
-                        .padding(.horizontal)
-                    }
 
-                    Spacer()
+                        Spacer()
+                    }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
             }
             .background(Color(.systemGroupedBackground))
             .navigationBarHidden(true)
@@ -181,7 +212,6 @@ struct MentorDashboardView: View {
                         SetGoalsView(student: student)
                             .environment(\.modelContext, modelContext)
                     } else {
-                        EmptyView()
                         NavigationStack {
                             VStack(spacing: 20) {
                                 Image(systemName: "exclamationmark.triangle")
@@ -189,8 +219,7 @@ struct MentorDashboardView: View {
                                     .foregroundColor(.orange)
 
                                 Text("Bir Hata Oluştu")
-                                    .font(.title2)
-                                    .fontWeight(.semibold)
+                                    .font(.title2.bold())
 
                                 Text("Öğrenci bilgileri yüklenemedi. Lütfen tekrar deneyin.")
                                     .font(.body)
@@ -221,62 +250,15 @@ struct MentorDashboardView: View {
         }
     }
 
-    // MARK: - Computed Properties
-
-    private var activeStudentsCount: Int {
-        students.filter { student in
-            hasRecentActivity(student: student, timeRange: selectedTimeRange)
-        }.count
-    }
-
-    private var warningStudentsCount: Int {
-        students.filter { student in
-            needsAttention(student: student)
-        }.count
-    }
-
-    private var recentPerformanceData: [PerformanceDataPoint] {
-        let calendar = Calendar.current
-        let now = Date()
-        var data: [PerformanceDataPoint] = []
-
-        for i in 0..<7 {
-            guard let date = calendar.date(byAdding: .day, value: -i, to: now) else { continue }
-            let dayExams = students.flatMap { $0.practiceExams }
-                .filter { calendar.isDate($0.date, inSameDayAs: date) }
-
-            let average: Double
-            if dayExams.isEmpty {
-                average = 0
-            } else {
-                let total = dayExams.map { $0.totalScore }.reduce(0, +)
-                let count = Double(dayExams.count)
-                average = count > 0 ? total / count : 0
-            }
-
-            // Ensure average is not NaN or infinite
-            let safeAverage = average.isFinite ? average : 0
-
-            data.append(PerformanceDataPoint(date: date, averageScore: safeAverage))
-        }
-
-        return data.reversed()
-    }
-
     // MARK: - Data Refresh Methods
-
     private func refreshDashboardData() {
-        // Force SwiftData to refresh by touching the modelContext
         try? modelContext.save()
-
-        // Force refresh of all students' computed properties
         for student in students {
             student.objectWillChange.send()
         }
     }
 
     // MARK: - Helper Functions
-
     private func hasRecentActivity(student: Student, timeRange: TimeRange) -> Bool {
         let calendar = Calendar.current
         let now = Date()
@@ -305,7 +287,6 @@ struct MentorDashboardView: View {
         return !hasRecentPracticeExam && !hasRecentQuestions
     }
 }
-
 // MARK: - Supporting Views
 
 struct DashboardCard: View {
@@ -1142,31 +1123,31 @@ struct GoalRow: View {
             HStack {
                 Text(subject)
                     .font(.subheadline.bold())
-
+                
                 Spacer()
-
+                
                 HStack(spacing: 4) {
                     TextField("15", text: $target)
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.center)
                         .frame(width: 40)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-
+                    
                     Text("/ \(maxNet)")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
-
+            
             if current > 0 {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Text("Mevcut: \(current, specifier: "%.1f")")
                             .font(.caption)
                             .foregroundColor(.secondary)
-
+                        
                         Spacer()
-
+                        
                         if let targetValue = Double(target), targetValue > 0 {
                             let difference = current - targetValue
                             if difference >= 0 {
@@ -1180,7 +1161,7 @@ struct GoalRow: View {
                             }
                         }
                     }
-
+                    
                     ProgressView(value: progress)
                         .progressViewStyle(LinearProgressViewStyle(tint: progressColor))
                         .scaleEffect(x: 1, y: 1.2, anchor: .center)
@@ -1189,4 +1170,4 @@ struct GoalRow: View {
         }
         .padding(.vertical, 4)
     }
-}
+    }

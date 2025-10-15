@@ -54,167 +54,180 @@ public struct AnalyticsView: View {
                             .padding(.horizontal)
                             .padding(.top, 8)
 
-                        // Student Picker
-                        if students.count > 1 {
-                            Picker("Öğrenci", selection: $selectedStudent) {
-                                Text("Tüm Öğrenciler").tag(Student?.none)
-                                ForEach(students) { student in
-                                    Text(student.fullName).tag(Optional(student))
-                                }
-                            }
-                            .pickerStyle(.menu)
-                            .padding(.horizontal)
-                        }
-
-                        // Overall Stats
-                        VStack(spacing: 16) {
-                            Text("Genel İstatistikler")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundStyle(Color.primaryGradient)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal)
-
-                            HStack(spacing: 16) {
-                                StatCard(
-                                    value: "\(students.count)",
-                                    label: "Öğrenci",
-                                    icon: "person.3.fill",
-                                    color: .blue
-                                )
-
-                                StatCard(
-                                    value: "\(filteredExams.count)",
-                                    label: selectedTimeRange == .all
-                                        ? "Toplam Deneme" : "Deneme Sayısı",
-                                    icon: "doc.text.fill",
-                                    color: .green
-                                )
-                            }
-                            .padding(.horizontal)
-
-                            HStack(spacing: 16) {
-                                StatCard(
-                                    value: String(format: "%.1f", averageScore),
-                                    label: "Ortalama Puan",
-                                    icon: "chart.bar.fill",
-                                    color: .orange
-                                )
-
-                                StatCard(
-                                    value: "\(topSubject?.0 ?? "-")",
-                                    label: "En İyi Ders",
-                                    icon: "star.fill",
-                                    color: .purple
-                                )
-                            }
-                            .padding(.horizontal)
-                        }
-
-                        // Performance Chart
-                        VStack(spacing: 12) {
-                            Text("Başarı Grafiği")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundStyle(Color.primaryGradient)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal)
-
-                            Chart {
-                                ForEach(filteredExams.sorted(by: { $0.date < $1.date })) { exam in
-                                    LineMark(
-                                        x: .value("Tarih", exam.date, unit: .day),
-                                        y: .value("Puan", exam.totalScore)
-                                    )
-                                    .foregroundStyle(
-                                        by: .value(
-                                            "Öğrenci", exam.student?.fullName ?? "Bilinmeyen")
-                                    )
-                                    .symbol(Circle().strokeBorder(lineWidth: 2))
-                                }
-                            }
-                            .chartXAxis {
-                                AxisMarks(values: .automatic) { value in
-                                    if let date = value.as(Date.self) {
-                                        AxisValueLabel {
-                                            Text(date, format: .dateTime.day().month(.narrow))
-                                        }
+                            // Student Picker
+                            if students.count > 1 {
+                                Picker("Öğrenci", selection: $selectedStudent) {
+                                    Text("Tüm Öğrenciler").tag(Student?.none)
+                                    ForEach(students) { student in
+                                        Text(student.fullName).tag(Optional(student))
                                     }
-                                    AxisGridLine()
-                                    AxisTick()
                                 }
+                                .pickerStyle(.menu)
+                                .padding(.horizontal)
                             }
-                            .frame(height: 200)
-                            .padding()
-                            .background(Color(.systemBackground))
-                            .cornerRadius(16)
-                            .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-                            .padding(.horizontal)
-                        }
 
-                        // Subject Performance
-                        if !subjectPerformance.isEmpty {
-                            VStack(spacing: 12) {
-                                Text("Ders Bazlı Performans")
+                            // Overall Stats
+                            VStack(spacing: 16) {
+                                Text("Genel İstatistikler")
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .foregroundStyle(Color.primaryGradient)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(.horizontal)
 
-                                VStack(spacing: 16) {
-                                    ForEach(subjectPerformance, id: \.subject) { data in
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            HStack {
-                                                HStack(spacing: 6) {
-                                                    Image(systemName: "book.fill")
-                                                        .font(.caption)
-                                                        .foregroundStyle(scoreColor(data.averageScore))
-                                                    Text(data.subject)
-                                                        .font(.headline)
-                                                }
+                                HStack(spacing: 16) {
+                                    StatCard(
+                                        value: "\(students.count)",
+                                        label: "Öğrenci",
+                                        icon: "person.3.fill",
+                                        color: .blue
+                                    )
 
-                                                Spacer()
+                                    StatCard(
+                                        value: "\(filteredExams.count)",
+                                        label: selectedTimeRange == .all
+                                            ? "Toplam Deneme" : "Deneme Sayısı",
+                                        icon: "doc.text.fill",
+                                        color: .green
+                                    )
+                                }
+                                .padding(.horizontal)
 
-                                                Text("\(Int(data.averageScore))%")
-                                                    .font(.title3.bold())
-                                                    .foregroundStyle(scoreColor(data.averageScore))
-                                            }
+                                HStack(spacing: 16) {
+                                    StatCard(
+                                        value: String(format: "%.1f", averageScore),
+                                        label: "Ortalama Puan",
+                                        icon: "chart.bar.fill",
+                                        color: .orange
+                                    )
 
-                                            GeometryReader { geometry in
-                                                ZStack(alignment: .leading) {
-                                                    RoundedRectangle(cornerRadius: 8)
-                                                        .fill(Color.gray.opacity(0.2))
-
-                                                    RoundedRectangle(cornerRadius: 8)
-                                                        .fill(
-                                                            LinearGradient(
-                                                                colors: [scoreColor(data.averageScore), scoreColor(data.averageScore).opacity(0.7)],
-                                                                startPoint: .leading,
-                                                                endPoint: .trailing
-                                                            )
-                                                        )
-                                                        .frame(width: geometry.size.width * (data.averageScore / 100))
-                                                }
-                                            }
-                                            .frame(height: 10)
-                                        }
-                                        .padding()
-                                        .background(Color(.systemBackground))
-                                        .cornerRadius(12)
-                                        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                                    }
+                                    StatCard(
+                                        value: "\(topSubject?.0 ?? "-")",
+                                        label: "En İyi Ders",
+                                        icon: "star.fill",
+                                        color: .purple
+                                    )
                                 }
                                 .padding(.horizontal)
                             }
-                        }
 
-                        Spacer()
+                            // Performance Chart
+                            VStack(spacing: 12) {
+                                Text("Başarı Grafiği")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundStyle(Color.primaryGradient)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal)
+
+                                Chart {
+                                    ForEach(filteredExams.sorted(by: { $0.date < $1.date })) {
+                                        exam in
+                                        LineMark(
+                                            x: .value("Tarih", exam.date, unit: .day),
+                                            y: .value("Puan", exam.totalScore)
+                                        )
+                                        .foregroundStyle(
+                                            by: .value(
+                                                "Öğrenci", exam.student?.fullName ?? "Bilinmeyen")
+                                        )
+                                        .symbol(Circle().strokeBorder(lineWidth: 2))
+                                    }
+                                }
+                                .chartXAxis {
+                                    AxisMarks(values: .automatic) { value in
+                                        if let date = value.as(Date.self) {
+                                            AxisValueLabel {
+                                                Text(date, format: .dateTime.day().month(.narrow))
+                                            }
+                                        }
+                                        AxisGridLine()
+                                        AxisTick()
+                                    }
+                                }
+                                .frame(height: 200)
+                                .padding()
+                                .background(Color(.systemBackground))
+                                .cornerRadius(16)
+                                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
+                                .padding(.horizontal)
+                            }
+
+                            // Subject Performance
+                            if !subjectPerformance.isEmpty {
+                                VStack(spacing: 12) {
+                                    Text("Ders Bazlı Performans")
+                                        .font(.title2)
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(Color.primaryGradient)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.horizontal)
+
+                                    VStack(spacing: 16) {
+                                        ForEach(subjectPerformance, id: \.subject) { data in
+                                            VStack(alignment: .leading, spacing: 8) {
+                                                HStack {
+                                                    HStack(spacing: 6) {
+                                                        Image(systemName: "book.fill")
+                                                            .font(.caption)
+                                                            .foregroundStyle(
+                                                                scoreColor(data.averageScore))
+                                                        Text(data.subject)
+                                                            .font(.headline)
+                                                    }
+
+                                                    Spacer()
+
+                                                    Text("\(Int(data.averageScore))%")
+                                                        .font(.title3.bold())
+                                                        .foregroundStyle(
+                                                            scoreColor(data.averageScore))
+                                                }
+
+                                                GeometryReader { geometry in
+                                                    ZStack(alignment: .leading) {
+                                                        RoundedRectangle(cornerRadius: 8)
+                                                            .fill(Color.gray.opacity(0.2))
+
+                                                        RoundedRectangle(cornerRadius: 8)
+                                                            .fill(
+                                                                LinearGradient(
+                                                                    colors: [
+                                                                        scoreColor(
+                                                                            data.averageScore),
+                                                                        scoreColor(
+                                                                            data.averageScore
+                                                                        ).opacity(0.7),
+                                                                    ],
+                                                                    startPoint: .leading,
+                                                                    endPoint: .trailing
+                                                                )
+                                                            )
+                                                            .frame(
+                                                                width: geometry.size.width
+                                                                    * (data.averageScore / 100))
+                                                    }
+                                                }
+                                                .frame(height: 10)
+                                            }
+                                            .padding()
+                                            .background(Color(.systemBackground))
+                                            .cornerRadius(12)
+                                            .shadow(
+                                                color: Color.black.opacity(0.05), radius: 5, x: 0,
+                                                y: 2)
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                                }
+                            }
+
+                            Spacer()
+                        }
+                        .padding(.vertical)
                     }
-                    .padding(.vertical)
+                    .navigationTitle("Analizler")
                 }
-                .navigationTitle("Analizler")
-                .background(Color(.systemGroupedBackground))
             }
         }
     }
@@ -307,42 +320,6 @@ struct SubjectPerformance: Identifiable {
     let averageScore: Double
 }
 
-// MARK: - StatCard Component
-
-struct StatCard: View {
-    let value: String
-    let label: String
-    let icon: String
-    let color: Color
-
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 32))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [color, color.opacity(0.7)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-
-            Text(value)
-                .font(.title2.bold())
-                .foregroundStyle(.primary)
-
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
-    }
-}
 
 struct AnalyticsView_Previews: PreviewProvider {
     static var previews: some View {
