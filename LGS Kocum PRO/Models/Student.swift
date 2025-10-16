@@ -14,6 +14,10 @@ final class Student: Identifiable, ObservableObject {
     var createdAt: Date
     var profileImageData: Data? = nil  // Profile photo storage
 
+    // Firebase sync için
+    var teacherID: String = "teacher_default"  // Öğretmen ID'si
+    var lastSyncDate: Date? = nil  // Son senkronizasyon tarihi
+
     // Goal tracking fields
     var targetTotalScore: Double = 400  // Default LGS target
     var targetTurkceNet: Double = 15

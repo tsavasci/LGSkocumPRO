@@ -76,6 +76,17 @@ struct SettingsView: View {
                         }
                     }
 
+                    // Test Section (Development)
+                    Section(
+                        header: Text("Geliştirici")
+                            .font(.headline)
+                            .foregroundStyle(Color.primaryGradient)
+                    ) {
+                        NavigationLink("Firebase Test") {
+                            FirebaseTestView()
+                        }
+                    }
+                    
                     // App Info Section
                     Section(
                         header: Text("Uygulama Hakkında")
