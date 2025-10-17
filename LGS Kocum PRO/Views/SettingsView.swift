@@ -5,9 +5,12 @@ import UniformTypeIdentifiers
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @AppStorage("appearance") private var appearance: Appearance = .system
+    @StateObject private var authService = TeacherAuthService.shared
     @State private var showingExportOptions = false
     @State private var showingImportOptions = false
     @State private var showingResetConfirmation = false
+    @State private var showingTeacherIDShare = false
+    @State private var showingQRCode = false
 
     enum Appearance: String, CaseIterable, Identifiable {
         case light = "Açık"
@@ -55,6 +58,64 @@ struct SettingsView: View {
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets())
                         .padding(.vertical, 8)
+                    }
+
+                    // Teacher ID Section
+                    Section(
+                        header: Text("Öğretmen Bilgileri")
+                            .font(.headline)
+                            .foregroundStyle(Color.primaryGradient)
+                    ) {
+                        if let teacherID = authService.currentTeacherID {
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack {
+                                    Text("Öğretmen Kodunuz:")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+
+                                    Spacer()
+
+                                    Text(teacherID)
+                                        .font(.title3)
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(Color.primaryGradient)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.blue.opacity(0.1))
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                }
+
+                                Text("Öğrencileriniz bu kodu kullanarak size bağlanabilirler.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(.vertical, 4)
+
+                            Button {
+                                showingQRCode = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "qrcode")
+                                    Text("QR Kod Göster")
+                                }
+                            }
+
+                            Button {
+                                showingTeacherIDShare = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "square.and.arrow.up")
+                                    Text("Kodu Paylaş")
+                                }
+                            }
+
+                            Button("Çıkış Yap", role: .destructive) {
+                                authService.logout()
+                            }
+                        } else {
+                            Text("Öğretmen ID'si yükleniyor...")
+                                .foregroundStyle(.secondary)
+                        }
                     }
 
                     // Data Management Section
@@ -165,6 +226,12 @@ struct SettingsView: View {
             .sheet(isPresented: $showingImportOptions) {
                 ImportDataView()
             }
+            .sheet(isPresented: $showingQRCode) {
+                TeacherQRCodeView()
+            }
+            .sheet(isPresented: $showingTeacherIDShare) {
+                TeacherIDShareView()
+            }
         }
         .preferredColorScheme(appearance.colorScheme)
     }
@@ -178,6 +245,110 @@ struct SettingsView: View {
         }
     }
 
+}
+
+// MARK: - Teacher ID Supporting Views
+
+struct TeacherQRCodeView: View {
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var authService = TeacherAuthService.shared
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                Text("Öğrencileriniz bu QR kodu tarayarak size bağlanabilir")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+
+                if let teacherID = authService.currentTeacherID,
+                   let qrImage = authService.generateQRCode(for: teacherID) {
+                    VStack(spacing: 16) {
+                        Image(uiImage: qrImage)
+                            .interpolation(.none)
+                            .resizable()
+                            .frame(width: 250, height: 250)
+                            .background(Color.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .shadow(radius: 5)
+
+                        Text(teacherID)
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundStyle(Color.primaryGradient)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(Color.blue.opacity(0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                } else {
+                    ProgressView()
+                        .padding()
+                }
+
+                Spacer()
+            }
+            .padding(.top, 40)
+            .navigationTitle("QR Kod")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Kapat") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct TeacherIDShareView: View {
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var authService = TeacherAuthService.shared
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Text(authService.shareTeacherID())
+                    .font(.body)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color(.systemGray6))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .padding()
+
+                ShareLink(
+                    item: authService.shareTeacherID(),
+                    subject: Text("LGS Kocum PRO - Öğretmen Kodu"),
+                    message: Text("Bana bağlanmak için bu kodu kullanın")
+                ) {
+                    HStack {
+                        Image(systemName: "square.and.arrow.up")
+                        Text("Paylaş")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .padding(.horizontal)
+
+                Spacer()
+            }
+            .padding(.top, 20)
+            .navigationTitle("Kodu Paylaş")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Kapat") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
 }
 
 // MARK: - Supporting Views

@@ -17,15 +17,17 @@ class FirestoreService: ObservableObject {
 
     /// SwiftData Student'ı Firestore'a senkronize et
     func syncStudentToFirestore(_ student: Student) async throws {
-        let studentData: [String: Any] = [
+        var studentData: [String: Any] = [
             "id": student.id.uuidString,
             "firstName": student.firstName,
             "lastName": student.lastName,
             "school": student.school,
             "grade": student.grade,
             "branch": student.branch,
+            "studentNumber": student.studentNumber,
             "notes": student.notes,
             "teacherID": currentTeacherID,
+            "status": student.status,
             "createdAt": Timestamp(date: student.createdAt),
             "targets": [
                 "totalScore": student.targetTotalScore,
@@ -37,6 +39,11 @@ class FirestoreService: ObservableObject {
                 "ingilizceNet": student.targetIngilizceNet
             ]
         ]
+
+        // Add approvedAt if exists
+        if let approvedAt = student.approvedAt {
+            studentData["approvedAt"] = Timestamp(date: approvedAt)
+        }
 
         try await db.collection("students")
             .document(student.id.uuidString)
@@ -162,6 +169,61 @@ class FirestoreService: ObservableObject {
         return snapshot.documents.map { $0.data() }
     }
 
+    // MARK: - Pending Request Operations
+
+    /// Bekleyen öğrenci isteklerini Firestore'dan çek
+    func fetchPendingRequests() async throws -> [[String: Any]] {
+        let snapshot = try await db.collection("pendingRequests")
+            .whereField("teacherID", isEqualTo: currentTeacherID)
+            .whereField("status", isEqualTo: "pending")
+            .order(by: "createdAt", descending: true)
+            .getDocuments()
+
+        return snapshot.documents.map { $0.data() }
+    }
+
+    /// Öğrenci isteğini onayla
+    func approveStudentRequest(requestID: String, studentID: String) async throws {
+        // 1. Update pending request
+        try await db.collection("pendingRequests")
+            .document(requestID)
+            .updateData([
+                "status": "approved",
+                "respondedAt": Timestamp(date: Date())
+            ])
+
+        // 2. Update student status
+        try await db.collection("students")
+            .document(studentID)
+            .updateData([
+                "status": "approved",
+                "approvedAt": Timestamp(date: Date())
+            ])
+
+        print("✅ Öğrenci onaylandı: \(studentID)")
+    }
+
+    /// Öğrenci isteğini reddet
+    func rejectStudentRequest(requestID: String, studentID: String) async throws {
+        // 1. Update pending request
+        try await db.collection("pendingRequests")
+            .document(requestID)
+            .updateData([
+                "status": "rejected",
+                "respondedAt": Timestamp(date: Date())
+            ])
+
+        // 2. Update student to solo mode
+        try await db.collection("students")
+            .document(studentID)
+            .updateData([
+                "status": "solo",
+                "teacherID": ""
+            ])
+
+        print("❌ Öğrenci isteği reddedildi: \(studentID)")
+    }
+
     // MARK: - Batch Operations
 
     /// Tüm öğrenci verilerini Firestore'a toplu senkronize et
@@ -172,15 +234,17 @@ class FirestoreService: ObservableObject {
         for student in students {
             // Student sync
             let studentRef = db.collection("students").document(student.id.uuidString)
-            let studentData: [String: Any] = [
+            var studentData: [String: Any] = [
                 "id": student.id.uuidString,
                 "firstName": student.firstName,
                 "lastName": student.lastName,
                 "school": student.school,
                 "grade": student.grade,
                 "branch": student.branch,
+                "studentNumber": student.studentNumber,
                 "notes": student.notes,
                 "teacherID": currentTeacherID,
+                "status": student.status,
                 "createdAt": Timestamp(date: student.createdAt),
                 "targets": [
                     "totalScore": student.targetTotalScore,
@@ -192,6 +256,9 @@ class FirestoreService: ObservableObject {
                     "ingilizceNet": student.targetIngilizceNet
                 ]
             ]
+            if let approvedAt = student.approvedAt {
+                studentData["approvedAt"] = Timestamp(date: approvedAt)
+            }
             batch.setData(studentData, forDocument: studentRef, merge: true)
             operationCount += 1
 

@@ -10,12 +10,15 @@ final class Student: Identifiable, ObservableObject {
     var school: String
     var grade: Int
     var branch: String = ""  // Şube bilgisi (A, B, C, etc.)
+    var studentNumber: String = ""  // Okul numarası (opsiyonel)
     var notes: String
     var createdAt: Date
     var profileImageData: Data? = nil  // Profile photo storage
 
     // Firebase sync için
     var teacherID: String = "teacher_default"  // Öğretmen ID'si
+    var status: String = "solo"  // "solo", "pending", "approved"
+    var approvedAt: Date? = nil  // Öğretmen onay tarihi
     var lastSyncDate: Date? = nil  // Son senkronizasyon tarihi
 
     // Goal tracking fields

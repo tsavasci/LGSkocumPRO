@@ -13,11 +13,14 @@ class FirestoreSyncManager: ObservableObject {
     @Published var isSyncing = false
     @Published var lastSyncDate: Date?
     @Published var syncError: String?
+    @Published var pendingRequests: [PendingRequest] = []
+    @Published var pendingRequestsCount: Int = 0
 
     // Active listeners
     private var studentListener: ListenerRegistration?
     private var examListener: ListenerRegistration?
     private var performanceListener: ListenerRegistration?
+    private var pendingRequestsListener: ListenerRegistration?
 
     private init() {}
 
@@ -87,8 +90,15 @@ class FirestoreSyncManager: ObservableObject {
         student.school = data["school"] as? String ?? ""
         student.grade = data["grade"] as? Int ?? 8
         student.branch = data["branch"] as? String ?? ""
+        student.studentNumber = data["studentNumber"] as? String ?? ""
         student.notes = data["notes"] as? String ?? ""
         student.teacherID = data["teacherID"] as? String ?? "teacher_default"
+        student.status = data["status"] as? String ?? "solo"
+
+        // Parse approvedAt timestamp
+        if let approvedAtTimestamp = data["approvedAt"] as? Timestamp {
+            student.approvedAt = approvedAtTimestamp.dateValue()
+        }
 
         // Update targets
         if let targets = data["targets"] as? [String: Any] {
@@ -246,9 +256,8 @@ class FirestoreSyncManager: ObservableObject {
                 }
             }
 
-        // Listen to new exams
+        // Listen to new exams - Tüm sınavları dinle, sonra studentID'ye göre filtrele
         examListener = db.collection("exams")
-            .whereField("teacherID", isEqualTo: teacherID)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
 
@@ -264,15 +273,40 @@ class FirestoreSyncManager: ObservableObject {
                 Task { @MainActor in
                     for change in snapshot.documentChanges {
                         if change.type == .added || change.type == .modified {
-                            await self.handleNewExam(change.document.data(), modelContext: modelContext)
+                            let data = change.document.data()
+
+                            // Sınavın studentID'sini al
+                            guard let studentIDString = data["studentID"] as? String,
+                                  let studentUUID = UUID(uuidString: studentIDString) else {
+                                continue
+                            }
+
+                            // Bu student bizim öğrencilerimizden biri mi kontrol et
+                            let descriptor = FetchDescriptor<Student>(
+                                predicate: #Predicate<Student> { student in
+                                    student.id == studentUUID &&
+                                    student.teacherID == teacherID &&
+                                    (student.status == "approved" || student.status == "solo")
+                                }
+                            )
+
+                            do {
+                                let students = try modelContext.fetch(descriptor)
+                                if !students.isEmpty {
+                                    // Bu bizim öğrencimiz, sınavı import et
+                                    await self.handleNewExam(data, modelContext: modelContext)
+                                    print("🆕 Yeni sınav algılandı: \(change.document.documentID)")
+                                }
+                            } catch {
+                                print("❌ Student kontrolü hatası: \(error)")
+                            }
                         }
                     }
                 }
             }
 
-        // Listen to new performances
+        // Listen to new performances - Tüm performansları dinle, sonra studentID'ye göre filtrele
         performanceListener = db.collection("questionPerformances")
-            .whereField("teacherID", isEqualTo: teacherID)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self else { return }
 
@@ -288,9 +322,64 @@ class FirestoreSyncManager: ObservableObject {
                 Task { @MainActor in
                     for change in snapshot.documentChanges {
                         if change.type == .added || change.type == .modified {
-                            await self.handleNewPerformance(change.document.data(), modelContext: modelContext)
+                            let data = change.document.data()
+
+                            // Performansın studentID'sini al
+                            guard let studentIDString = data["studentID"] as? String,
+                                  let studentUUID = UUID(uuidString: studentIDString) else {
+                                continue
+                            }
+
+                            // Bu student bizim öğrencilerimizden biri mi kontrol et
+                            let descriptor = FetchDescriptor<Student>(
+                                predicate: #Predicate<Student> { student in
+                                    student.id == studentUUID &&
+                                    student.teacherID == teacherID &&
+                                    (student.status == "approved" || student.status == "solo")
+                                }
+                            )
+
+                            do {
+                                let students = try modelContext.fetch(descriptor)
+                                if !students.isEmpty {
+                                    // Bu bizim öğrencimiz, performansı import et
+                                    await self.handleNewPerformance(data, modelContext: modelContext)
+                                    print("🆕 Yeni performans algılandı: \(change.document.documentID)")
+                                }
+                            } catch {
+                                print("❌ Student kontrolü hatası: \(error)")
+                            }
                         }
                     }
+                }
+            }
+
+        // Listen to pending requests
+        pendingRequestsListener = db.collection("pendingRequests")
+            .whereField("teacherID", isEqualTo: teacherID)
+            .whereField("status", isEqualTo: "pending")
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
+
+                if let error = error {
+                    Task { @MainActor in
+                        self.syncError = "İstek dinleme hatası: \(error.localizedDescription)"
+                    }
+                    return
+                }
+
+                guard let snapshot = snapshot else { return }
+
+                Task { @MainActor in
+                    // Convert all pending requests
+                    let requests = snapshot.documents.compactMap { doc in
+                        PendingRequest.fromFirestoreData(doc.data())
+                    }
+
+                    self.pendingRequests = requests
+                    self.pendingRequestsCount = requests.count
+
+                    print("📬 Bekleyen istek sayısı: \(requests.count)")
                 }
             }
 
@@ -302,10 +391,12 @@ class FirestoreSyncManager: ObservableObject {
         studentListener?.remove()
         examListener?.remove()
         performanceListener?.remove()
+        pendingRequestsListener?.remove()
 
         studentListener = nil
         examListener = nil
         performanceListener = nil
+        pendingRequestsListener = nil
 
         print("🔇 Firestore dinleyicileri durduruldu")
     }

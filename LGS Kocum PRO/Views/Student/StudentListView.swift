@@ -31,6 +31,9 @@ struct StudentListView: View {
 
     private var filteredStudents: [Student] {
         students.filter { student in
+            // Only show approved students (students that have been approved by teacher)
+            let isApprovedStudent = student.status == "approved" || student.status == "solo"
+
             let matchesSearch =
                 searchText.isEmpty || student.fullName.localizedCaseInsensitiveContains(searchText)
                 || student.school.localizedCaseInsensitiveContains(searchText)
@@ -43,7 +46,7 @@ struct StudentListView: View {
             let matchesBranch =
                 selectedBranch == "Tüm Şubeler" || student.branch == selectedBranch
 
-            return matchesSearch && matchesSchool && matchesGrade && matchesBranch
+            return isApprovedStudent && matchesSearch && matchesSchool && matchesGrade && matchesBranch
         }
     }
 

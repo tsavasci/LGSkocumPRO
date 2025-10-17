@@ -4,6 +4,7 @@ import SwiftUI
 struct MainTabView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Student.lastName) private var students: [Student]
+    @StateObject private var syncManager = FirestoreSyncManager.shared
 
     var body: some View {
         TabView {
@@ -18,6 +19,12 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Öğrenciler", systemImage: "person.3.fill")
                 }
+
+            PendingRequestsView()
+                .tabItem {
+                    Label("İstekler", systemImage: "person.badge.clock.fill")
+                }
+                .badge(syncManager.pendingRequestsCount)
 
             if !students.isEmpty {
                 AnalyticsView()
