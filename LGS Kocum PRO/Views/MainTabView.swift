@@ -3,7 +3,12 @@ import SwiftUI
 
 struct MainTabView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Student.lastName) private var students: [Student]
+    @Query(
+        filter: #Predicate<Student> { student in
+            student.status == "approved" || student.status == "solo"
+        },
+        sort: \Student.lastName
+    ) private var students: [Student]
     @StateObject private var syncManager = FirestoreSyncManager.shared
 
     var body: some View {

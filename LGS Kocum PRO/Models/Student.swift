@@ -16,10 +16,13 @@ final class Student: Identifiable, ObservableObject {
     var profileImageData: Data? = nil  // Profile photo storage
 
     // Firebase sync için
-    var teacherID: String = "teacher_default"  // Öğretmen ID'si
+    var teacherID: String = ""  // Öğretmen ID'si (runtime'da set edilir)
     var status: String = "solo"  // "solo", "pending", "approved"
     var approvedAt: Date? = nil  // Öğretmen onay tarihi
     var lastSyncDate: Date? = nil  // Son senkronizasyon tarihi
+
+    // Connection type: "online" (student has the app) or "offline" (manually added by teacher)
+    var connectionType: String = "offline"  // "online", "offline"
 
     // Goal tracking fields
     var targetTotalScore: Double = 400  // Default LGS target
@@ -55,6 +58,11 @@ final class Student: Identifiable, ObservableObject {
         let first = firstName.isEmpty ? "Ad" : firstName
         let last = lastName.isEmpty ? "Soyad" : lastName
         return "\(first) \(last)"
+    }
+
+    // Check if student is online (has the Student App connected)
+    var isOnline: Bool {
+        return connectionType == "online"
     }
 
     // Profile image computed property

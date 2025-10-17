@@ -174,6 +174,16 @@ struct AddPracticeExamView: View {
                 // Save changes
                 try modelContext.save()
 
+                // Sync to Firebase for backup
+                Task {
+                    do {
+                        try await FirestoreService.shared.syncExamToFirestore(exam, studentID: student.id)
+                        print("✅ Manuel sınav Firebase'e kaydedildi: \(exam.name)")
+                    } catch {
+                        print("❌ Manuel sınav Firebase'e kaydedilemedi: \(error.localizedDescription)")
+                    }
+                }
+
                 // Dismiss after a short delay
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     dismiss()
@@ -637,6 +647,16 @@ struct AddQuestionPerformanceView: View {
                 modelContext.insert(questionPerformance)
                 student.questionPerformances.append(questionPerformance)
                 try modelContext.save()
+
+                // Sync to Firebase for backup
+                Task {
+                    do {
+                        try await FirestoreService.shared.syncPerformanceToFirestore(questionPerformance, studentID: student.id)
+                        print("✅ Manuel soru çözümü Firebase'e kaydedildi: \(selectedSubject)")
+                    } catch {
+                        print("❌ Manuel soru çözümü Firebase'e kaydedilemedi: \(error.localizedDescription)")
+                    }
+                }
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                     dismiss()

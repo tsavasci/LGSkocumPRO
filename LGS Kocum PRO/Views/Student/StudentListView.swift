@@ -275,14 +275,31 @@ struct StudentCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                // Student Avatar
-                StudentProfileImageView(student: student, size: 40)
+            HStack(spacing: 0) {
+                // Student Avatar with online indicator
+                ZStack(alignment: .topLeading) {
+                    StudentProfileImageView(student: student, size: 40)
 
-                VStack(alignment: .leading, spacing: 2) {
+                    // Online indicator - green checkmark badge on avatar
+                    if student.isOnline {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(.white, .green)
+                            .background(
+                                Circle()
+                                    .fill(.white)
+                                    .frame(width: 14, height: 14)
+                            )
+                            .offset(x: -2, y: -2)
+                    }
+                }
+                .frame(width: 40)
+
+                VStack(alignment: .leading, spacing: 4) {
                     Text(student.fullName)
                         .font(.headline)
                         .foregroundStyle(.primary)
+                        .lineLimit(1)
 
                     HStack(spacing: 4) {
                         if !student.school.isEmpty {
@@ -290,8 +307,9 @@ struct StudentCard: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             Text(student.school)
-                                .font(.subheadline)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
+                                .lineLimit(1)
                         }
 
                         if !student.school.isEmpty {
@@ -306,15 +324,16 @@ struct StudentCard: View {
 
                         if !student.branch.isEmpty {
                             Text("\(student.grade). Sınıf \(student.branch)")
-                                .font(.subheadline)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         } else {
                             Text("\(student.grade). Sınıf")
-                                .font(.subheadline)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
                 }
+                .padding(.leading, 12)
 
                 Spacer()
 

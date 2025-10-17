@@ -12,6 +12,11 @@ struct SettingsView: View {
     @State private var showingTeacherIDShare = false
     @State private var showingQRCode = false
 
+    // Easter egg - Developer mode
+    @State private var iconTapCount = 0
+    @State private var isDeveloperModeEnabled = false
+    @State private var showingDeveloperUnlocked = false
+
     enum Appearance: String, CaseIterable, Identifiable {
         case light = "Açık"
         case dark = "Koyu"
@@ -137,14 +142,31 @@ struct SettingsView: View {
                         }
                     }
 
-                    // Test Section (Development)
-                    Section(
-                        header: Text("Geliştirici")
-                            .font(.headline)
-                            .foregroundStyle(Color.primaryGradient)
-                    ) {
-                        NavigationLink("Firebase Test") {
-                            FirebaseTestView()
+                    // Test Section (Development) - Hidden behind easter egg
+                    if isDeveloperModeEnabled {
+                        Section(
+                            header: HStack {
+                                Text("🔓 Geliştirici Modu")
+                                    .font(.headline)
+                                    .foregroundStyle(Color.primaryGradient)
+                                Spacer()
+                                Button("Kilitle") {
+                                    withAnimation {
+                                        isDeveloperModeEnabled = false
+                                        iconTapCount = 0
+                                    }
+                                }
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                            }
+                        ) {
+                            NavigationLink("Firebase Test") {
+                                FirebaseTestView()
+                            }
+
+                            Text("Tap Sayısı: \(iconTapCount)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     }
                     
@@ -164,13 +186,14 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                         }
 
-                        Link(
-                            "Gizlilik Politikası",
-                            destination: URL(string: "https://example.com/privacy")!)
-                        Link(
-                            "Kullanım Koşulları",
-                            destination: URL(string: "https://example.com/terms")!
-                        )
+                        // Privacy & Terms - Replace with actual URLs before production
+                        if let privacyURL = URL(string: "https://www.example.com/privacy") {
+                            Link("Gizlilik Politikası", destination: privacyURL)
+                        }
+
+                        if let termsURL = URL(string: "https://www.example.com/terms") {
+                            Link("Kullanım Koşulları", destination: termsURL)
+                        }
 
                         HStack {
                             Spacer()
@@ -184,6 +207,11 @@ struct SettingsView: View {
                                         .font(.system(size: 40))
                                         .foregroundStyle(.white)
                                 }
+                                .onTapGesture {
+                                    handleIconTap()
+                                }
+                                .scaleEffect(iconTapCount > 0 && iconTapCount < 10 ? 1.1 : 1.0)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: iconTapCount)
 
                                 Text("LGS Koçum PRO")
                                     .font(.title2.bold())
@@ -232,8 +260,42 @@ struct SettingsView: View {
             .sheet(isPresented: $showingTeacherIDShare) {
                 TeacherIDShareView()
             }
+            .alert("🎉 Geliştirici Modu Açıldı!", isPresented: $showingDeveloperUnlocked) {
+                Button("Harika!") {
+                    withAnimation(.spring()) {
+                        isDeveloperModeEnabled = true
+                    }
+                }
+            } message: {
+                Text("Artık gelişmiş ayarlara erişebilirsiniz. Bu özellik yalnızca test ve geliştirme amaçlıdır.")
+            }
         }
         .preferredColorScheme(appearance.colorScheme)
+    }
+
+    // MARK: - Easter Egg Functions
+
+    private func handleIconTap() {
+        iconTapCount += 1
+
+        // Reset after 3 seconds of inactivity
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            if iconTapCount < 10 {
+                iconTapCount = 0
+            }
+        }
+
+        // Easter egg unlocked!
+        if iconTapCount == 10 {
+            showingDeveloperUnlocked = true
+            // Haptic feedback
+            let generator = UIImpactFeedbackGenerator(style: .heavy)
+            generator.impactOccurred()
+        } else if iconTapCount > 5 {
+            // Light haptic for getting close
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+        }
     }
 
     private func resetData() {

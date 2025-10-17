@@ -10,7 +10,12 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        MainTabView()
+        ZStack {
+            MainTabView()
+
+            // In-app notification banner (üstte gösterilecek)
+            InAppNotificationBanner()
+        }
     }
 }
 

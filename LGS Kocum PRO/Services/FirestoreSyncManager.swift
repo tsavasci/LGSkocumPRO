@@ -92,8 +92,11 @@ class FirestoreSyncManager: ObservableObject {
         student.branch = data["branch"] as? String ?? ""
         student.studentNumber = data["studentNumber"] as? String ?? ""
         student.notes = data["notes"] as? String ?? ""
-        student.teacherID = data["teacherID"] as? String ?? "teacher_default"
+        student.teacherID = data["teacherID"] as? String ?? ""
         student.status = data["status"] as? String ?? "solo"
+
+        // Students from Firebase are online (they have the Student App)
+        student.connectionType = "online"
 
         // Parse approvedAt timestamp
         if let approvedAtTimestamp = data["approvedAt"] as? Timestamp {
@@ -374,6 +377,16 @@ class FirestoreSyncManager: ObservableObject {
                     // Convert all pending requests
                     let requests = snapshot.documents.compactMap { doc in
                         PendingRequest.fromFirestoreData(doc.data())
+                    }
+
+                    // Yeni istek varsa in-app notification göster
+                    if requests.count > self.pendingRequestsCount {
+                        let newRequest = requests.first
+                        InAppNotificationService.shared.show(
+                            title: "Yeni Bağlantı İsteği 📬",
+                            message: "\(newRequest?.studentName ?? "Bir öğrenci") size bağlanmak istiyor",
+                            type: .info
+                        )
                     }
 
                     self.pendingRequests = requests

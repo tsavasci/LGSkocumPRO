@@ -14,8 +14,7 @@ class TeacherAuthService: ObservableObject {
         didSet {
             if let id = currentTeacherID {
                 UserDefaults.standard.set(id, forKey: teacherIDKey)
-                // Update FirestoreService
-                FirestoreService.shared.currentTeacherID = id
+                // FirestoreService automatically reads from here via computed property
             } else {
                 UserDefaults.standard.removeObject(forKey: teacherIDKey)
             }
@@ -30,8 +29,7 @@ class TeacherAuthService: ObservableObject {
         if let savedID = UserDefaults.standard.string(forKey: teacherIDKey) {
             self.currentTeacherID = savedID
             self.isAuthenticated = true
-            // Update FirestoreService
-            FirestoreService.shared.currentTeacherID = savedID
+            // FirestoreService automatically reads from here via computed property
         }
     }
 

@@ -8,8 +8,10 @@ class FirestoreService: ObservableObject {
 
     private let db = Firestore.firestore()
 
-    // Current teacher ID (şimdilik sabit, sonra Authentication ile dinamik olacak)
-    @Published var currentTeacherID: String = "teacher_default"
+    // Current teacher ID - dynamically fetched from TeacherAuthService
+    var currentTeacherID: String {
+        return TeacherAuthService.shared.currentTeacherID ?? "teacher_default"
+    }
 
     private init() {}
 

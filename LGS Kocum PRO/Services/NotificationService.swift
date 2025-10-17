@@ -45,8 +45,11 @@ class NotificationService: NSObject, ObservableObject {
 
     // MARK: - FCM Token Management
 
-    /// FCM token'ı al ve kaydet
+    /// FCM token'ı al ve kaydet (APNS token hazır olana kadar bekle)
     func getFCMToken() async {
+        // APNS token için 2 saniye bekle
+        try? await Task.sleep(nanoseconds: 2_000_000_000)
+
         do {
             let token = try await Messaging.messaging().token()
             await MainActor.run {
@@ -58,6 +61,7 @@ class NotificationService: NSObject, ObservableObject {
             await saveFCMTokenToFirebase(token)
         } catch {
             print("❌ [NotificationService] FCM Token alınamadı: \(error.localizedDescription)")
+            print("ℹ️  APNS token henüz hazır değil olabilir. Push Notifications capability eklendi mi?")
         }
     }
 

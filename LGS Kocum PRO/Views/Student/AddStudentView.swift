@@ -102,7 +102,22 @@ struct AddStudentView: View {
             student.profileImage = selectedImage
         }
 
+        // Manual students are offline (no Student App)
+        student.connectionType = "offline"
+        student.status = "solo"
+        student.teacherID = FirestoreService.shared.currentTeacherID
+
         modelContext.insert(student)
+
+        // Sync to Firebase for backup
+        Task {
+            do {
+                try await FirestoreService.shared.syncStudentToFirestore(student)
+                print("✅ Manuel öğrenci Firebase'e kaydedildi: \(student.fullName)")
+            } catch {
+                print("❌ Manuel öğrenci Firebase'e kaydedilemedi: \(error.localizedDescription)")
+            }
+        }
     }
 }
 

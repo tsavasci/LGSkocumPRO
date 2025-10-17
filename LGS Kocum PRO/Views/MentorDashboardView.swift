@@ -5,7 +5,12 @@ import UniformTypeIdentifiers
 
 struct MentorDashboardView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Student.lastName) private var students: [Student]
+    @Query(
+        filter: #Predicate<Student> { student in
+            student.status == "approved" || student.status == "solo"
+        },
+        sort: \Student.lastName
+    ) private var students: [Student]
 
     @State private var selectedTimeRange: TimeRange = .week
     @State private var showingGoalsSheet = false
@@ -72,9 +77,9 @@ struct MentorDashboardView: View {
                     VStack(spacing: 20) {
                         // Quick Stats Header
                         VStack(spacing: 16) {
-                            HStack {
-                                Text("Mentor Dashboard")
-                                    .font(.title.bold())
+                            VStack(spacing: 12) {
+                                Text("Dashboard")
+                                    .font(.largeTitle.bold())
                                     .foregroundStyle(Color.primaryGradient)
                                     .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -84,7 +89,6 @@ struct MentorDashboardView: View {
                                     }
                                 }
                                 .pickerStyle(.segmented)
-                                .frame(width: 200)
                             }
                             .padding(.horizontal)
 
@@ -377,30 +381,47 @@ struct StudentStatusCard: View {
 
     var body: some View {
         NavigationLink(destination: StudentDetailView(student: student)) {
-            HStack(spacing: 16) {
+            HStack(spacing: 0) {
                 // Student Avatar with gradient border
-                ZStack {
+                ZStack(alignment: .topLeading) {
                     Circle()
                         .fill(Color.primaryGradient)
                         .frame(width: 56, height: 56)
 
                     StudentProfileImageView(student: student, size: 50)
                         .clipShape(Circle())
-                }
 
-                VStack(alignment: .leading, spacing: 6) {
+                    // Online indicator - green checkmark badge on avatar
+                    if student.isOnline {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(.white, .green)
+                            .background(
+                                Circle()
+                                    .fill(.white)
+                                    .frame(width: 16, height: 16)
+                            )
+                            .offset(x: -2, y: -2)
+                    }
+                }
+                .frame(width: 56)
+
+                VStack(alignment: .leading, spacing: 5) {
                     Text(student.fullName)
                         .font(.headline)
                         .foregroundStyle(.primary)
+                        .lineLimit(1)
 
                     if !student.branch.isEmpty {
                         Text("\(student.school) • \(student.grade). Sınıf \(student.branch)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                            .lineLimit(1)
                     } else {
                         Text("\(student.school) • \(student.grade). Sınıf")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                            .lineLimit(1)
                     }
 
                     HStack(spacing: 4) {
@@ -411,6 +432,7 @@ struct StudentStatusCard: View {
                     }
                     .foregroundStyle(.secondary)
                 }
+                .padding(.leading, 12)
 
                 Spacer()
 
