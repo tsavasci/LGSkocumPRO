@@ -1,0 +1,1133 @@
+<!doctype html>
+<html lang="tr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>LGS Koçum PRO - Öğrencilerinizin Gelişimini Takip Edin</title>
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" href="favicon.png" />
+        <link rel="apple-touch-icon" href="app-icon.png" />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            :root {
+                --primary-gradient: linear-gradient(
+                    135deg,
+                    #667eea 0%,
+                    #764ba2 100%
+                );
+                --success-gradient: linear-gradient(
+                    135deg,
+                    #11998e 0%,
+                    #38ef7d 100%
+                );
+                --warning-gradient: linear-gradient(
+                    135deg,
+                    #f093fb 0%,
+                    #f5576c 100%
+                );
+                --info-gradient: linear-gradient(
+                    135deg,
+                    #4facfe 0%,
+                    #00f2fe 100%
+                );
+                --sunset-gradient: linear-gradient(
+                    135deg,
+                    #ff6b6b 0%,
+                    #feca57 100%
+                );
+                --ocean-gradient: linear-gradient(
+                    135deg,
+                    #2193b0 0%,
+                    #6dd5ed 100%
+                );
+                --background: #0f0f1e;
+                --card-bg: rgba(255, 255, 255, 0.05);
+                --text-primary: #ffffff;
+                --text-secondary: rgba(255, 255, 255, 0.7);
+                --shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            }
+
+            body {
+                font-family:
+                    "Inter",
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    Roboto,
+                    sans-serif;
+                background: var(--background);
+                color: var(--text-primary);
+                line-height: 1.6;
+                overflow-x: hidden;
+            }
+
+            /* Animated Background */
+            .animated-bg {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: -1;
+                background: linear-gradient(
+                    135deg,
+                    #0f0f1e 0%,
+                    #1a1a2e 50%,
+                    #16213e 100%
+                );
+            }
+
+            .animated-bg::before,
+            .animated-bg::after {
+                content: "";
+                position: absolute;
+                width: 500px;
+                height: 500px;
+                border-radius: 50%;
+                filter: blur(100px);
+                opacity: 0.3;
+                animation: float 20s infinite ease-in-out;
+            }
+
+            .animated-bg::before {
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                top: -250px;
+                left: -250px;
+                animation-delay: 0s;
+            }
+
+            .animated-bg::after {
+                background: linear-gradient(135deg, #f093fb, #f5576c);
+                bottom: -250px;
+                right: -250px;
+                animation-delay: 10s;
+            }
+
+            @keyframes float {
+                0%,
+                100% {
+                    transform: translate(0, 0) scale(1);
+                }
+                25% {
+                    transform: translate(50px, 100px) scale(1.1);
+                }
+                50% {
+                    transform: translate(-50px, 50px) scale(0.9);
+                }
+                75% {
+                    transform: translate(100px, -50px) scale(1.05);
+                }
+            }
+
+            /* Navigation */
+            nav {
+                padding: 20px 50px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                backdrop-filter: blur(10px);
+                background: rgba(255, 255, 255, 0.03);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+                animation: slideDown 0.5s ease-out;
+            }
+
+            @keyframes slideDown {
+                from {
+                    transform: translateY(-100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-size: 1.5rem;
+                font-weight: 800;
+                background: var(--primary-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .logo img {
+                width: 45px;
+                height: 45px;
+                border-radius: 10px;
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            }
+
+            .nav-links {
+                display: flex;
+                gap: 30px;
+                list-style: none;
+            }
+
+            .nav-links a {
+                color: var(--text-secondary);
+                text-decoration: none;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .nav-links a::after {
+                content: "";
+                position: absolute;
+                bottom: -5px;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: var(--primary-gradient);
+                transition: width 0.3s ease;
+            }
+
+            .nav-links a:hover {
+                color: var(--text-primary);
+            }
+
+            .nav-links a:hover::after {
+                width: 100%;
+            }
+
+            /* Hero Section */
+            .hero {
+                text-align: center;
+                padding: 100px 20px;
+                animation: fadeInUp 0.8s ease-out;
+            }
+
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .hero h1 {
+                font-size: clamp(2.5rem, 6vw, 4rem);
+                font-weight: 900;
+                margin-bottom: 20px;
+                background: linear-gradient(
+                    135deg,
+                    #ffffff 0%,
+                    #667eea 50%,
+                    #764ba2 100%
+                );
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                animation: fadeInUp 0.8s ease-out 0.2s backwards;
+            }
+
+            .hero p {
+                font-size: 1.3rem;
+                color: var(--text-secondary);
+                max-width: 700px;
+                margin: 0 auto 40px;
+                animation: fadeInUp 0.8s ease-out 0.4s backwards;
+            }
+
+            /* Buttons */
+            .cta-buttons {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                flex-wrap: wrap;
+                animation: fadeInUp 0.8s ease-out 0.6s backwards;
+            }
+
+            .btn {
+                padding: 15px 40px;
+                border-radius: 50px;
+                font-weight: 600;
+                font-size: 1rem;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                border: none;
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .btn::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.2);
+                transition: left 0.5s ease;
+            }
+
+            .btn:hover::before {
+                left: 100%;
+            }
+
+            .btn-primary {
+                background: var(--primary-gradient);
+                color: white;
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            }
+
+            .btn-primary:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+            }
+
+            .btn-secondary {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .btn-secondary:hover {
+                background: rgba(255, 255, 255, 0.15);
+                transform: translateY(-3px);
+            }
+
+            /* Features Section */
+            .features {
+                max-width: 1200px;
+                margin: 80px auto;
+                padding: 0 20px;
+            }
+
+            .section-title {
+                text-align: center;
+                font-size: 2.5rem;
+                font-weight: 800;
+                margin-bottom: 60px;
+                background: var(--primary-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .features-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 30px;
+            }
+
+            .feature-card {
+                background: var(--card-bg);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 20px;
+                padding: 40px;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .feature-card::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: var(--primary-gradient);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                z-index: -1;
+            }
+
+            .feature-card:hover {
+                transform: translateY(-10px);
+                box-shadow: var(--shadow);
+                border-color: rgba(102, 126, 234, 0.5);
+            }
+
+            .feature-card:hover::before {
+                opacity: 0.1;
+            }
+
+            .feature-icon {
+                width: 60px;
+                height: 60px;
+                border-radius: 15px;
+                background: var(--primary-gradient);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                margin-bottom: 20px;
+            }
+
+            .feature-card:nth-child(2) .feature-icon {
+                background: var(--success-gradient);
+            }
+
+            .feature-card:nth-child(3) .feature-icon {
+                background: var(--warning-gradient);
+            }
+
+            .feature-card:nth-child(4) .feature-icon {
+                background: var(--info-gradient);
+            }
+
+            .feature-card:nth-child(5) .feature-icon {
+                background: var(--sunset-gradient);
+            }
+
+            .feature-card:nth-child(6) .feature-icon {
+                background: var(--ocean-gradient);
+            }
+
+            .feature-card h3 {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 15px;
+            }
+
+            .feature-card p {
+                color: var(--text-secondary);
+                line-height: 1.8;
+            }
+
+            /* Stats Section */
+            .stats {
+                max-width: 1200px;
+                margin: 100px auto;
+                padding: 60px 20px;
+                background: var(--card-bg);
+                backdrop-filter: blur(10px);
+                border-radius: 30px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 40px;
+                text-align: center;
+            }
+
+            .stat-item {
+                padding: 20px;
+            }
+
+            .stat-number {
+                font-size: 3rem;
+                font-weight: 900;
+                background: var(--primary-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                display: block;
+                margin-bottom: 10px;
+            }
+
+            .stat-item:nth-child(2) .stat-number {
+                background: var(--success-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .stat-item:nth-child(3) .stat-number {
+                background: var(--warning-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .stat-label {
+                color: var(--text-secondary);
+                font-size: 1.1rem;
+                font-weight: 500;
+            }
+
+            /* Contact Section */
+            .contact {
+                max-width: 800px;
+                margin: 100px auto;
+                padding: 0 20px;
+                text-align: center;
+            }
+
+            .contact-card {
+                background: var(--card-bg);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 30px;
+                padding: 60px 40px;
+            }
+
+            .contact h2 {
+                font-size: 2.5rem;
+                font-weight: 800;
+                margin-bottom: 20px;
+                background: var(--primary-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .contact p {
+                color: var(--text-secondary);
+                font-size: 1.1rem;
+                margin-bottom: 30px;
+            }
+
+            .contact-links {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                align-items: center;
+            }
+
+            .contact-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                padding: 15px 30px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 15px;
+                color: var(--text-primary);
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-weight: 500;
+            }
+
+            .contact-link:hover {
+                background: rgba(255, 255, 255, 0.1);
+                transform: translateX(10px);
+                border-color: rgba(102, 126, 234, 0.5);
+            }
+
+            /* Footer */
+            footer {
+                text-align: center;
+                padding: 40px 20px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                margin-top: 100px;
+                color: var(--text-secondary);
+            }
+
+            footer p {
+                margin-bottom: 20px;
+            }
+
+            .footer-links {
+                display: flex;
+                gap: 30px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .footer-links a {
+                color: var(--text-secondary);
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+
+            .footer-links a:hover {
+                color: var(--text-primary);
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                nav {
+                    padding: 20px;
+                    flex-direction: column;
+                    gap: 20px;
+                }
+
+                .nav-links {
+                    flex-direction: column;
+                    gap: 15px;
+                    text-align: center;
+                }
+
+                .hero {
+                    padding: 60px 20px;
+                }
+
+                .hero h1 {
+                    font-size: 2.5rem;
+                }
+
+                .hero p {
+                    font-size: 1.1rem;
+                }
+
+                .cta-buttons {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .btn {
+                    width: 100%;
+                    max-width: 300px;
+                }
+
+                .features-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .stats-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .section-title {
+                    font-size: 2rem;
+                }
+            }
+
+            /* Scroll Animations */
+            .animate-on-scroll {
+                opacity: 0;
+                transform: translateY(30px);
+                transition: all 0.6s ease;
+            }
+
+            .animate-on-scroll.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            /* Loading Animation */
+            @keyframes shimmer {
+                0% {
+                    background-position: -1000px 0;
+                }
+                100% {
+                    background-position: 1000px 0;
+                }
+            }
+
+            .shimmer {
+                animation: shimmer 2s infinite linear;
+                background: linear-gradient(
+                    to right,
+                    rgba(255, 255, 255, 0) 0%,
+                    rgba(255, 255, 255, 0.1) 50%,
+                    rgba(255, 255, 255, 0) 100%
+                );
+                background-size: 1000px 100%;
+            }
+
+            /* Screenshot Cards */
+            .screenshot-card {
+                transition: transform 0.3s ease;
+            }
+
+            .screenshot-card:hover {
+                transform: translateY(-10px);
+            }
+
+            .screenshot-card img {
+                transition: all 0.3s ease;
+            }
+
+            .screenshot-card:hover img {
+                box-shadow: 0 30px 80px rgba(102, 126, 234, 0.4) !important;
+            }
+
+            .screenshot-card h4 {
+                color: var(--text-secondary);
+                transition: color 0.3s ease;
+            }
+
+            .screenshot-card:hover h4 {
+                color: var(--text-primary);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="animated-bg"></div>
+
+        <!-- Navigation -->
+        <nav>
+            <div class="logo">
+                <img src="logo.png" alt="LGS Koçum PRO Logo" />
+                <span>LGS Koçum PRO</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">Özellikler</a></li>
+                <li><a href="#stats">İstatistikler</a></li>
+                <li><a href="#contact">İletişim</a></li>
+            </ul>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1>Öğrencilerinizin Gelişimini<br />Gerçek Zamanlı Takip Edin</h1>
+            <p>
+                LGS Koçum PRO ile tüm öğrencilerinizin sınav performanslarını tek bir yerden izleyin.
+                Detaylı analizler yapın, gelişimlerini takip edin ve daha etkili rehberlik sağlayın.
+            </p>
+
+            <!-- App Store Badge -->
+            <div style="margin: 30px 0">
+                <a
+                    href="#"
+                    style="
+                        display: inline-block;
+                        transition: transform 0.3s ease;
+                    "
+                    onmouseover="this.style.transform='scale(1.05)'"
+                    onmouseout="this.style.transform='scale(1)'"
+                >
+                    <img
+                        src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/tr-tr?size=250x83&releaseDate=1704067200"
+                        alt="App Store'dan İndir"
+                        style="
+                            border-radius: 13px;
+                            height: 60px;
+                            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                        "
+                    />
+                </a>
+            </div>
+
+            <div class="cta-buttons">
+                <a href="#features" class="btn btn-primary"
+                    >Özellikleri Keşfet</a
+                >
+                <a href="#contact" class="btn btn-secondary">İletişime Geç</a>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <h2 class="section-title">Güçlü Özellikler</h2>
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">👥</div>
+                    <h3>Öğrenci Yönetimi</h3>
+                    <p>
+                        Tüm öğrencilerinizi tek bir platformdan yönetin. Bağlantı isteklerini onaylayın ve öğrencilerinizin bilgilerine kolayca erişin.
+                    </p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">☁️</div>
+                    <h3>Gerçek Zamanlı Senkronizasyon</h3>
+                    <p>
+                        Öğrencileriniz sınav girdiği anda veriler otomatik olarak size ulaşır. Manuel veri girişine gerek kalmaz.
+                    </p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">📊</div>
+                    <h3>Detaylı Analizler</h3>
+                    <p>
+                        Her öğrencinizin performansını ayrı ayrı inceleyin. Güçlü ve zayıf yönlerini net bir şekilde görün.
+                    </p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">📈</div>
+                    <h3>Gelişim Takibi</h3>
+                    <p>
+                        Öğrencilerinizin zaman içindeki ilerlemelerini grafiklerle görselleştirin. Trend analizleri yapın.
+                    </p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Ders Bazlı Raporlar</h3>
+                    <p>
+                        Türkçe, Matematik, Fen ve daha fazlası... Her ders için detaylı performans raporlarına erişin.
+                    </p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Güvenli Bağlantı</h3>
+                    <p>
+                        6 haneli özel kodunuzla öğrencilerinizi güvenle ekleyin. Tüm veriler şifreli olarak saklanır.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Online Features Section -->
+        <section class="features" style="margin-top: 100px;">
+            <h2 class="section-title">🌐 Nasıl Çalışır?</h2>
+            <div style="max-width: 900px; margin: 0 auto 60px; text-align: center;">
+                <p style="font-size: 1.2rem; color: var(--text-secondary); line-height: 1.8;">
+                    Öğrencilerinizle anlık bağlantı kurun. Onların LGS Koçum uygulamasına girdikleri tüm sınav verilerini otomatik olarak alın ve takip edin.
+                </p>
+            </div>
+
+            <!-- How It Works -->
+            <div style="max-width: 800px; margin: 80px auto 0; padding: 40px; background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;">
+                <h3 style="text-align: center; font-size: 2rem; margin-bottom: 40px; background: var(--success-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    Adım Adım Kurulum
+                </h3>
+
+                <div style="display: flex; flex-direction: column; gap: 30px;">
+                    <div style="display: flex; gap: 20px; align-items: start;">
+                        <div style="min-width: 50px; height: 50px; border-radius: 50%; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">1</div>
+                        <div>
+                            <h4 style="margin-bottom: 10px; font-size: 1.2rem;">Uygulamayı İndirin</h4>
+                            <p style="color: var(--text-secondary); line-height: 1.6;">
+                                LGS Koçum PRO uygulamasını App Store'dan indirin ve hesabınızı oluşturun.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; align-items: start;">
+                        <div style="min-width: 50px; height: 50px; border-radius: 50%; background: var(--success-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">2</div>
+                        <div>
+                            <h4 style="margin-bottom: 10px; font-size: 1.2rem;">Özel Kodunuzu Alın</h4>
+                            <p style="color: var(--text-secondary); line-height: 1.6;">
+                                Uygulamada size özel 6 haneli bir kod üretilir (örn: ABC123). Bu kodu öğrencilerinizle paylaşın.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; align-items: start;">
+                        <div style="min-width: 50px; height: 50px; border-radius: 50%; background: var(--info-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">3</div>
+                        <div>
+                            <h4 style="margin-bottom: 10px; font-size: 1.2rem;">Öğrenci Bağlantı İsteklerini Onaylayın</h4>
+                            <p style="color: var(--text-secondary); line-height: 1.6;">
+                                Öğrencileriniz LGS Koçum uygulamasında kodunuzu girdiğinde size bildirim gelir. İsteği onaylayın.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 20px; align-items: start;">
+                        <div style="min-width: 50px; height: 50px; border-radius: 50%; background: var(--warning-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">4</div>
+                        <div>
+                            <h4 style="margin-bottom: 10px; font-size: 1.2rem;">Performansları Takip Edin</h4>
+                            <p style="color: var(--text-secondary); line-height: 1.6;">
+                                Artık öğrencilerinizin girdiği her sınav otomatik olarak size ulaşır. Detaylı analizler yapın ve rehberlik edin.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Screenshots Section -->
+        <section class="features" style="margin-top: 100px;">
+            <h2 class="section-title">📱 Uygulama Görünümü</h2>
+            <div style="max-width: 900px; margin: 0 auto 60px; text-align: center;">
+                <p style="font-size: 1.2rem; color: var(--text-secondary); line-height: 1.8;">
+                    Modern ve kullanıcı dostu arayüzümüzle tüm öğrencilerinizi kolayca yönetin.
+                </p>
+            </div>
+
+            <!-- Screenshot Gallery -->
+            <div style="max-width: 1400px; margin: 0 auto; padding: 0 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+                    <!-- Screenshot 1 -->
+                    <div class="screenshot-card animate-on-scroll">
+                        <img src="p1.png" alt="Öğrenci Profili" style="width: 100%; height: auto; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                        <h4 style="margin-top: 20px; font-size: 1.1rem; text-align: center;">Öğrenci Profili</h4>
+                    </div>
+
+                    <!-- Screenshot 2 -->
+                    <div class="screenshot-card animate-on-scroll">
+                        <img src="p2.png" alt="Öğrenci Detayları" style="width: 100%; height: auto; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                        <h4 style="margin-top: 20px; font-size: 1.1rem; text-align: center;">Öğrenci Detayları</h4>
+                    </div>
+
+                    <!-- Screenshot 3 -->
+                    <div class="screenshot-card animate-on-scroll">
+                        <img src="p3.png" alt="Öğrenci Listesi" style="width: 100%; height: auto; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                        <h4 style="margin-top: 20px; font-size: 1.1rem; text-align: center;">Öğrenci Listesi</h4>
+                    </div>
+
+                    <!-- Screenshot 4 -->
+                    <div class="screenshot-card animate-on-scroll">
+                        <img src="p33.png" alt="Veri Yönetimi" style="width: 100%; height: auto; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                        <h4 style="margin-top: 20px; font-size: 1.1rem; text-align: center;">Veri Yönetimi</h4>
+                    </div>
+
+                    <!-- Screenshot 5 -->
+                    <div class="screenshot-card animate-on-scroll">
+                        <img src="p4.png" alt="İstek Yönetimi" style="width: 100%; height: auto; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                        <h4 style="margin-top: 20px; font-size: 1.1rem; text-align: center;">İstek Yönetimi</h4>
+                    </div>
+
+                    <!-- Screenshot 6 -->
+                    <div class="screenshot-card animate-on-scroll">
+                        <img src="p44.png" alt="Dashboard" style="width: 100%; height: auto; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                        <h4 style="margin-top: 20px; font-size: 1.1rem; text-align: center;">Dashboard</h4>
+                    </div>
+
+                    <!-- Screenshot 7 -->
+                    <div class="screenshot-card animate-on-scroll">
+                        <img src="p5.png" alt="Ayarlar" style="width: 100%; height: auto; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                        <h4 style="margin-top: 20px; font-size: 1.1rem; text-align: center;">Ayarlar</h4>
+                    </div>
+
+                    <!-- Screenshot 8 -->
+                    <div class="screenshot-card animate-on-scroll">
+                        <img src="p6.png" alt="Öğretmen Kaydı" style="width: 100%; height: auto; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                        <h4 style="margin-top: 20px; font-size: 1.1rem; text-align: center;">Öğretmen Kaydı</h4>
+                    </div>
+
+                    <!-- Screenshot 9 -->
+                    <div class="screenshot-card animate-on-scroll">
+                        <img src="p7.png" alt="Analizler" style="width: 100%; height: auto; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
+                        <h4 style="margin-top: 20px; font-size: 1.1rem; text-align: center;">Analizler</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section id="stats" class="stats animate-on-scroll">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">50+</span>
+                    <span class="stat-label">Aktif Öğretmen</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Takip Edilen Öğrenci</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">5K+</span>
+                    <span class="stat-label">Analiz Edilen Sınav</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Download CTA Section -->
+        <section
+            class="download-cta"
+            style="max-width: 1200px; margin: 100px auto; padding: 0 20px"
+        >
+            <div
+                style="
+                    background: linear-gradient(
+                        135deg,
+                        #667eea 0%,
+                        #764ba2 100%
+                    );
+                    border-radius: 30px;
+                    padding: 80px 40px;
+                    text-align: center;
+                    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+                "
+            >
+                <h2
+                    style="
+                        font-size: 2.5rem;
+                        font-weight: 900;
+                        color: white;
+                        margin-bottom: 20px;
+                    "
+                >
+                    📱 Hemen Başlayın!
+                </h2>
+                <p
+                    style="
+                        font-size: 1.3rem;
+                        color: rgba(255, 255, 255, 0.9);
+                        margin-bottom: 40px;
+                        max-width: 600px;
+                        margin-left: auto;
+                        margin-right: auto;
+                    "
+                >
+                    Öğrencilerinizin LGS yolculuğunda yanlarında olun. Daha etkili rehberlik için hemen indirin!
+                </p>
+                <a
+                    href="#"
+                    style="
+                        display: inline-block;
+                        transition: transform 0.3s ease;
+                    "
+                    onmouseover="this.style.transform='translateY(-5px)'"
+                    onmouseout="this.style.transform='translateY(0)'"
+                >
+                    <img
+                        src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/tr-tr?size=250x83&releaseDate=1704067200"
+                        alt="App Store'dan İndir"
+                        style="
+                            border-radius: 13px;
+                            height: 70px;
+                            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+                        "
+                    />
+                </a>
+                <div
+                    style="
+                        margin-top: 30px;
+                        display: flex;
+                        gap: 40px;
+                        justify-content: center;
+                        flex-wrap: wrap;
+                        color: white;
+                    "
+                >
+                    <div>
+                        <div style="font-size: 2rem; font-weight: bold">✨</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9">
+                            Ücretsiz
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2rem; font-weight: bold">🔒</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9">
+                            Güvenli
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2rem; font-weight: bold">⚡</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9">Anlık</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2rem; font-weight: bold">📊</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9">
+                            Detaylı Analiz
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact">
+            <div class="contact-card animate-on-scroll">
+                <h2>İletişime Geçin</h2>
+                <p>
+                    Sorularınız, önerileriniz veya geri bildirimleriniz için
+                    bizimle iletişime geçebilirsiniz.
+                </p>
+                <div class="contact-links">
+                    <a
+                        href="mailto:tamersavasci@icloud.com"
+                        class="contact-link"
+                    >
+                        <span>📧</span>
+                        <span>tamersavasci@icloud.com</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <a
+                href="#"
+                style="display: inline-block; margin-bottom: 20px"
+            >
+                <img
+                    src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/tr-tr?size=250x83&releaseDate=1704067200"
+                    alt="App Store'dan İndir"
+                    style="
+                        border-radius: 13px;
+                        height: 50px;
+                        transition: transform 0.3s ease;
+                    "
+                    onmouseover="this.style.transform='scale(1.05)'"
+                    onmouseout="this.style.transform='scale(1)'"
+                />
+            </a>
+            <p>© 2025 LGS Koçum PRO. Tüm hakları saklıdır.</p>
+            <div class="footer-links">
+                <a href="index.html">Ana Sayfa</a>
+                <a href="privacy-policy.html">Gizlilik Politikası</a>
+                <a href="terms-of-use.html">Kullanım Koşulları</a>
+                <a href="privacy-policy-en.html">Privacy Policy (EN)</a>
+                <a href="terms-of-use-en.html">Terms of Use (EN)</a>
+            </div>
+        </footer>
+
+        <script>
+            // Scroll Animation
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: "0px 0px -50px 0px",
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("visible");
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll(".animate-on-scroll").forEach((el) => {
+                observer.observe(el);
+            });
+
+            // Smooth Scrolling
+            document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+                anchor.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(
+                        this.getAttribute("href"),
+                    );
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                        });
+                    }
+                });
+            });
+
+            // Counter Animation
+            const animateCounter = (element, target) => {
+                let current = 0;
+                const increment = target / 50;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        element.textContent = target + "+";
+                        clearInterval(timer);
+                    } else {
+                        element.textContent = Math.floor(current) + "+";
+                    }
+                }, 30);
+            };
+
+            const statsObserver = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            const numbers =
+                                entry.target.querySelectorAll(".stat-number");
+                            numbers.forEach((num) => {
+                                const target = parseInt(num.textContent);
+                                animateCounter(num, target);
+                            });
+                            statsObserver.unobserve(entry.target);
+                        }
+                    });
+                },
+                { threshold: 0.5 },
+            );
+
+            const statsSection = document.querySelector(".stats");
+            if (statsSection) {
+                statsObserver.observe(statsSection);
+            }
+        </script>
+    </body>
+</html>

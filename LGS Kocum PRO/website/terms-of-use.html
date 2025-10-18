@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="tr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>LGS Koçum PRO - Kullanım Koşulları</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            :root {
+                --primary-gradient: linear-gradient(
+                    135deg,
+                    #667eea 0%,
+                    #764ba2 100%
+                );
+                --background: #0f0f1e;
+                --card-bg: rgba(255, 255, 255, 0.05);
+                --text-primary: #ffffff;
+                --text-secondary: rgba(255, 255, 255, 0.7);
+                --shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            }
+
+            body {
+                font-family:
+                    "Inter",
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    Roboto,
+                    sans-serif;
+                background: var(--background);
+                color: var(--text-primary);
+                line-height: 1.8;
+                overflow-x: hidden;
+            }
+
+            .animated-bg {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: -1;
+                background: linear-gradient(
+                    135deg,
+                    #0f0f1e 0%,
+                    #1a1a2e 50%,
+                    #16213e 100%
+                );
+            }
+
+            .animated-bg::before,
+            .animated-bg::after {
+                content: "";
+                position: absolute;
+                width: 500px;
+                height: 500px;
+                border-radius: 50%;
+                filter: blur(100px);
+                opacity: 0.3;
+                animation: float 20s infinite ease-in-out;
+            }
+
+            .animated-bg::before {
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                top: -250px;
+                left: -250px;
+                animation-delay: 0s;
+            }
+
+            .animated-bg::after {
+                background: linear-gradient(135deg, #f093fb, #f5576c);
+                bottom: -250px;
+                right: -250px;
+                animation-delay: 10s;
+            }
+
+            @keyframes float {
+                0%,
+                100% {
+                    transform: translate(0, 0) scale(1);
+                }
+                25% {
+                    transform: translate(50px, 100px) scale(1.1);
+                }
+                50% {
+                    transform: translate(-50px, 50px) scale(0.9);
+                }
+                75% {
+                    transform: translate(100px, -50px) scale(1.05);
+                }
+            }
+
+            nav {
+                padding: 20px 50px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                backdrop-filter: blur(10px);
+                background: rgba(255, 255, 255, 0.03);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+                font-weight: 800;
+                background: var(--primary-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                text-decoration: none;
+            }
+
+            .back-link {
+                color: var(--text-secondary);
+                text-decoration: none;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .back-link:hover {
+                color: var(--text-primary);
+                transform: translateX(-5px);
+            }
+
+            .container {
+                max-width: 900px;
+                margin: 80px auto;
+                padding: 0 20px;
+            }
+
+            .content-card {
+                background: var(--card-bg);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 30px;
+                padding: 60px;
+                box-shadow: var(--shadow);
+            }
+
+            h1 {
+                font-size: 3rem;
+                font-weight: 900;
+                margin-bottom: 20px;
+                background: var(--primary-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                text-align: center;
+            }
+
+            .last-updated {
+                text-align: center;
+                color: var(--text-secondary);
+                font-size: 1rem;
+                margin-bottom: 50px;
+                padding-bottom: 30px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            h2 {
+                font-size: 2rem;
+                font-weight: 700;
+                margin-top: 40px;
+                margin-bottom: 20px;
+                color: var(--text-primary);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            h2::before {
+                content: "";
+                width: 4px;
+                height: 30px;
+                background: var(--primary-gradient);
+                border-radius: 2px;
+            }
+
+            h3 {
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin-top: 30px;
+                margin-bottom: 15px;
+                color: var(--text-primary);
+            }
+
+            p {
+                color: var(--text-secondary);
+                margin-bottom: 20px;
+                font-size: 1.1rem;
+            }
+
+            ul,
+            ol {
+                margin: 20px 0;
+                padding-left: 30px;
+            }
+
+            ul li,
+            ol li {
+                color: var(--text-secondary);
+                margin-bottom: 12px;
+                font-size: 1.1rem;
+            }
+
+            a {
+                color: #667eea;
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
+
+            a:hover {
+                color: #764ba2;
+            }
+
+            .section {
+                margin-bottom: 40px;
+                padding: 30px;
+                background: rgba(255, 255, 255, 0.02);
+                border-radius: 20px;
+                border-left: 3px solid transparent;
+                transition: all 0.3s ease;
+            }
+
+            .section:hover {
+                border-left-color: #667eea;
+                background: rgba(255, 255, 255, 0.04);
+            }
+
+            .icon {
+                font-size: 2rem;
+                margin-right: 10px;
+            }
+
+            .highlight-box {
+                background: rgba(102, 126, 234, 0.1);
+                border-left: 4px solid #667eea;
+                padding: 20px;
+                margin: 30px 0;
+                border-radius: 10px;
+            }
+
+            .highlight-box p {
+                margin: 0;
+                color: var(--text-primary);
+            }
+
+            footer {
+                text-align: center;
+                padding: 40px 20px;
+                margin-top: 80px;
+                color: var(--text-secondary);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .footer-links {
+                display: flex;
+                gap: 30px;
+                justify-content: center;
+                flex-wrap: wrap;
+                margin-top: 20px;
+            }
+
+            .footer-links a {
+                color: var(--text-secondary);
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+
+            .footer-links a:hover {
+                color: var(--text-primary);
+            }
+
+            @media (max-width: 768px) {
+                nav {
+                    padding: 20px;
+                    flex-direction: column;
+                    gap: 20px;
+                }
+
+                .container {
+                    margin: 40px auto;
+                    padding: 0 15px;
+                }
+
+                .content-card {
+                    padding: 30px 20px;
+                    border-radius: 20px;
+                }
+
+                h1 {
+                    font-size: 2rem;
+                }
+                h2 {
+                    font-size: 1.5rem;
+                }
+                h3 {
+                    font-size: 1.2rem;
+                }
+                p,
+                ul li,
+                ol li {
+                    font-size: 1rem;
+                }
+                .section {
+                    padding: 20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="animated-bg"></div>
+
+        <nav>
+            <a href="index.html" class="logo">👨‍🏫 LGS Koçum PRO</a>
+            <a href="index.html" class="back-link">
+                <span>←</span>
+                <span>Ana Sayfaya Dön</span>
+            </a>
+        </nav>
+
+        <div class="container">
+            <div class="content-card">
+                <h1>📋 Kullanım Koşulları</h1>
+                <p class="last-updated">Son güncellenme: 18 Ekim 2025</p>
+
+                <div class="section">
+                    <h2><span class="icon">📱</span> 1. Genel Hükümler</h2>
+                    <p>
+                        LGS Koçum PRO uygulamasını kullanarak, aşağıdaki kullanım
+                        koşullarını kabul etmiş olursunuz. Lütfen bu koşulları
+                        dikkatlice okuyunuz.
+                    </p>
+                    <div class="highlight-box">
+                        <p>
+                            <strong>Önemli:</strong> Bu koşulları kabul
+                            etmiyorsanız, lütfen uygulamayı kullanmayınız.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><span class="icon">🎯</span> 2. Uygulamanın Amacı</h2>
+                    <p>
+                        LGS Koçum PRO uygulaması, LGS sınavına hazırlanan öğrencilere rehberlik eden öğretmenler için tasarlanmıştır ve şu amaçlarla kullanılır:
+                    </p>
+                    <ul>
+                        <li>Öğrenci sınav sonuçlarını takip etmek</li>
+                        <li>Öğrenci performansını analiz etmek</li>
+                        <li>Öğrencilere detaylı raporlama sağlamak</li>
+                        <li>Öğrenci gelişimini izlemek</li>
+                        <li>Öğrencilerle güvenli bağlantı kurmak</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h2><span class="icon">✅</span> 3. Kullanım Hakları</h2>
+                    <h3>3.1. Lisans</h3>
+                    <p>
+                        Size, bu uygulamayı eğitim amaçlı kullanmak için sınırlı, münhasır olmayan, devredilemez bir lisans verilir.
+                    </p>
+
+                    <h3>3.2. Kısıtlamalar</h3>
+                    <p>Aşağıdaki eylemleri gerçekleştirmek yasaktır:</p>
+                    <ul>
+                        <li>
+                            Uygulamanın kaynak kodunu tersine mühendislik yapmak
+                        </li>
+                        <li>
+                            Uygulamayı kopyalamak, değiştirmek veya türev
+                            çalışmalar oluşturmak
+                        </li>
+                        <li>
+                            Uygulamayı ticari amaçlarla kullanmak veya satmak
+                        </li>
+                        <li>Uygulamanın içeriğini izinsiz dağıtmak</li>
+                        <li>Uygulamanın işlevselliğini bozmaya çalışmak</li>
+                        <li>Öğrenci verilerini izinsiz paylaşmak veya satmak</li>
+                    </ul>
+
+                    <h3>3.3. Telif Hakları</h3>
+                    <p>
+                        Uygulama içeriği, tasarımı ve tüm materyalleri LGS
+                        Koçum PRO'ya aittir ve telif hakkı yasalarıyla korunmaktadır.
+                    </p>
+                </div>
+
+                <div class="section">
+                    <h2>
+                        <span class="icon">💾</span> 4. Veri Kullanımı ve
+                        Gizlilik
+                    </h2>
+                    <h3>4.1. Veri Depolama</h3>
+                    <p>
+                        Öğrenci verileri Firebase Cloud Firestore'da güvenli bir şekilde saklanır. Öğretmen sadece kendi öğrencilerinin verilerine erişebilir.
+                    </p>
+
+                    <h3>4.2. Veri Sorumluluğu</h3>
+                    <p>
+                        Öğretmen, öğrenci verilerinin gizliliğini korumaktan ve yalnızca eğitim amaçlı kullanmaktan sorumludur. Öğrenci verilerini üçüncü taraflarla paylaşmak yasaktır.
+                    </p>
+
+                    <h3>4.3. Öğrenci Bağlantıları</h3>
+                    <p>
+                        Öğrenciler öğretmene bağlantı isteği gönderir. Öğretmen bu istekleri onayladığında, öğrencinin sınav verileri otomatik olarak öğretmenle paylaşılır.
+                    </p>
+
+                    <h3>4.4. Veri Güvenliği</h3>
+                    <div class="highlight-box">
+                        <p>
+                            <strong>Önemli:</strong> Öğretmen ID kodunuzu güvenli tutun. Bu kod ile öğrenciler size bağlantı isteği gönderebilir.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2><span class="icon">⚠️</span> 5. Sorumluluk Reddi</h2>
+                    <h3>5.1. "Olduğu Gibi" Sunumu</h3>
+                    <p>
+                        Uygulama "olduğu gibi" ve "mevcut haliyle"
+                        sunulmaktadır. Herhangi bir açık veya zımni garanti
+                        verilmemektedir.
+                    </p>
+
+                    <h3>5.2. Sınırlı Sorumluluk</h3>
+                    <p>
+                        LGS Koçum PRO, uygulamanın kullanımından veya
+                        kullanılamamasından kaynaklanan hiçbir doğrudan,
+                        dolaylı, arızi, özel veya sonuç olarak ortaya çıkan
+                        zarardan sorumlu tutulamaz.
+                    </p>
+
+                    <h3>5.3. Eğitim Amaçlı Kullanım</h3>
+                    <div class="highlight-box">
+                        <p>
+                            <strong>Önemli Uyarı:</strong> Bu uygulama bir
+                            öğrenci takip aracıdır. Öğrenci performansını değerlendirirken pedagojik yaklaşımları göz önünde bulundurun.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>
+                        <span class="icon">🔄</span> 6. Güncellemeler ve
+                        Değişiklikler
+                    </h2>
+                    <h3>6.1. Uygulama Güncellemeleri</h3>
+                    <p>
+                        Uygulamayı herhangi bir zamanda güncelleme, değiştirme
+                        veya sonlandırma hakkımız saklıdır. Güncellemeler
+                        otomatik olarak veya kullanıcı onayıyla yüklenebilir.
+                    </p>
+
+                    <h3>6.2. Koşul Değişiklikleri</h3>
+                    <p>
+                        Bu kullanım koşullarını herhangi bir zamanda güncelleme
+                        hakkımız saklıdır. Değişiklikler bu sayfada yayınlanacak
+                        ve yürürlük tarihi güncellenecektir.
+                    </p>
+
+                    <h3>6.3. Bildirim</h3>
+                    <p>
+                        Önemli değişiklikler uygulama içinde bildirilecektir.
+                        Değişikliklerden sonra uygulamayı kullanmaya devam
+                        etmeniz, yeni koşulları kabul ettiğiniz anlamına gelir.
+                    </p>
+                </div>
+
+                <div class="section">
+                    <h2>
+                        <span class="icon">👥</span> 7. Kullanıcı Davranışları
+                    </h2>
+                    <h3>7.1. Kabul Edilebilir Kullanım</h3>
+                    <p>Uygulamayı kullanırken:</p>
+                    <ul>
+                        <li>
+                            Yürürlükteki tüm yasalara ve düzenlemelere
+                            uymalısınız
+                        </li>
+                        <li>
+                            Öğrenci gizliliğine saygı göstermelisiniz
+                        </li>
+                        <li>
+                            Uygulamanın güvenliğini tehlikeye düşürmemelisiniz
+                        </li>
+                        <li>Öğrenci verilerini etik kurallara uygun kullanmalısınız</li>
+                        <li>Öğrenci verilerini üçüncü taraflarla paylaşmamalısınız</li>
+                    </ul>
+
+                    <h3>7.2. Hesap Güvenliği</h3>
+                    <p>
+                        Öğretmen ID kodunuzun güvenliğinden siz
+                        sorumlusunuz. Yetkisiz erişimi önlemek için uygun
+                        güvenlik önlemlerini alınız.
+                    </p>
+
+                    <h3>7.3. Veri Gizliliği</h3>
+                    <p>
+                        Öğrenci verilerini KVKK (Kişisel Verilerin Korunması Kanunu) ve ilgili eğitim mevzuatına uygun şekilde korumalısınız.
+                    </p>
+                </div>
+
+                <div class="section">
+                    <h2><span class="icon">🔚</span> 8. Fesih</h2>
+                    <h3>8.1. Kullanıcı Tarafından</h3>
+                    <p>
+                        Uygulamayı cihazınızdan silerek istediğiniz zaman
+                        kullanımı sonlandırabilirsiniz. Hesabınızı sildiğinizde, öğrenci bağlantılarınız korunur ancak yeni veri senkronizasyonu durur.
+                    </p>
+
+                    <h3>8.2. Geliştirici Tarafından</h3>
+                    <p>
+                        Bu koşulları ihlal etmeniz durumunda, bildirimde
+                        bulunmaksızın erişiminizi sonlandırma hakkımız saklıdır.
+                    </p>
+
+                    <h3>8.3. Fesih Sonrası</h3>
+                    <p>
+                        Fesih durumunda, öğrenci verileri Firebase'de saklanmaya devam eder. Verilerinizi silmek isterseniz bizimle iletişime geçin.
+                    </p>
+                </div>
+
+                <div class="section">
+                    <h2><span class="icon">⚖️</span> 9. Yasal Hükümler</h2>
+                    <h3>9.1. Yürürlükteki Hukuk</h3>
+                    <p>
+                        Bu koşullar Türkiye Cumhuriyeti yasalarına tabidir ve
+                        bunlara göre yorumlanır.
+                    </p>
+
+                    <h3>9.2. Uyuşmazlık Çözümü</h3>
+                    <p>
+                        Bu koşullardan kaynaklanan herhangi bir uyuşmazlık,
+                        öncelikle dostane görüşmelerle çözülmeye çalışılacaktır.
+                    </p>
+
+                    <h3>9.3. Bölünebilirlik</h3>
+                    <p>
+                        Bu koşulların herhangi bir hükmünün geçersiz veya
+                        uygulanamaz olması durumunda, geri kalan hükümler tam
+                        olarak yürürlükte kalacaktır.
+                    </p>
+                </div>
+
+                <div class="section">
+                    <h2><span class="icon">📞</span> 10. İletişim</h2>
+                    <p>
+                        Bu kullanım koşulları hakkında sorularınız, yorumlarınız
+                        veya endişeleriniz varsa, lütfen bizimle iletişime
+                        geçin:
+                    </p>
+                    <p>
+                        <strong>E-posta:</strong>
+                        <a href="mailto:tamersavasci@icloud.com"
+                            >tamersavasci@icloud.com</a
+                        >
+                    </p>
+                    <p>
+                        Geri bildirimleriniz ve önerileriniz bizim için
+                        değerlidir. Uygulamayı geliştirmemize yardımcı
+                        olursunuz.
+                    </p>
+                </div>
+
+                <div class="section">
+                    <h2><span class="icon">✍️</span> 11. Kabul Onayı</h2>
+                    <p>
+                        LGS Koçum PRO uygulamasını indirerek, yükleyerek veya
+                        kullanarak, bu kullanım koşullarını okuduğunuzu,
+                        anladığınızı ve bunlara uymayı kabul ettiğinizi
+                        onaylarsınız.
+                    </p>
+                    <div class="highlight-box">
+                        <p>
+                            Bu koşulları kabul etmiyorsanız, uygulamayı
+                            kullanmamalı ve derhal cihazınızdan kaldırmalısınız.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2025 LGS Koçum PRO. Tüm hakları saklıdır.</p>
+            <div class="footer-links">
+                <a href="index.html">Ana Sayfa</a>
+                <a href="privacy-policy.html">Gizlilik Politikası</a>
+                <a href="terms-of-use.html">Kullanım Koşulları</a>
+            </div>
+        </footer>
+    </body>
+</html>

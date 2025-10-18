@@ -181,7 +181,7 @@ struct SettingsView: View {
                             Spacer()
                             Text(
                                 Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-                                    ?? "1.0.0"
+                                    ?? "1.1.0"
                             )
                             .foregroundStyle(.secondary)
                         }
@@ -218,7 +218,7 @@ struct SettingsView: View {
                                     .foregroundStyle(Color.primaryGradient)
 
                                 Text(
-                                    "v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")"
+                                    "v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.1.0")"
                                 )
                                 .font(.caption)
                                 .foregroundStyle(.secondary)

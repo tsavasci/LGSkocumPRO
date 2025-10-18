@@ -26,7 +26,7 @@ class FirebaseTestViewModel: ObservableObject {
             let testData: [String: Any] = [
                 "timestamp": Timestamp(date: Date()),
                 "message": "Test - Firestore Bağlantısı",
-                "appVersion": "1.0.0"
+                "appVersion": "1.1.0"
             ]
 
             // Firestore'a test verisi gönder
